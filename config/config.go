@@ -3,9 +3,9 @@ package config
 import "github.com/spf13/viper"
 
 type Config struct {
-	Database *Database
-	Server   *Server
-	Security *Security
+	Database Database
+	Server   Server
+	Security Security
 }
 
 type Database struct {
@@ -43,7 +43,7 @@ func Init(param Params) (*Config, error) {
 		return &Config{}, err
 	}
 
-	database := &Database{
+	database := Database{
 		Driver:   viper.GetString("database.driver"),
 		Host:     viper.GetString("database.host"),
 		Port:     viper.GetInt("database.port"),
@@ -53,12 +53,12 @@ func Init(param Params) (*Config, error) {
 		Charset:  viper.GetString("database.charset"),
 	}
 
-	server := &Server{
+	server := Server{
 		Host: viper.GetString("server.host"),
 		Port: viper.GetInt("server.port"),
 	}
 
-	security := &Security{
+	security := Security{
 		SecretKey:           viper.GetString("security.secret_key"),
 		EncryptionAlgorithm: viper.GetString("security.encryption_algorithm"),
 	}
