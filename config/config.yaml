@@ -1,0 +1,17 @@
+# database configuration
+database:
+  driver: mysql
+  host: "127.0.0.1"
+  port: 3306
+  db: flightData
+  username: root
+  password: root
+  charset: "utf8mb4"
+# Server configuration
+server:
+  address: localhost
+  port: 8000
+# Security configuration
+security:
+  secret_key: mysecretkey
+  encryption_algorithm: AES-256
