@@ -1,8 +1,7 @@
+DROP TABLE IF EXISTS flights;
 
-DROP TABLE IF EXISTS flight;
+DROP TABLE IF EXISTS canceling_situations;
 
-DROP TABLE IF EXISTS canceling_situation;
+DROP TABLE IF EXISTS airplanes;
 
-DROP TABLE IF EXISTS airplane;
-
-DROP TABLE IF EXISTS city;
+DROP TABLE IF EXISTS cities;

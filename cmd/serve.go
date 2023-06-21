@@ -3,6 +3,7 @@ package cmd
 import (
 	"flight-data-api/config"
 	"flight-data-api/database"
+	"flight-data-api/http/handler"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/spf13/cobra"
@@ -45,12 +46,15 @@ func serve() {
 		panic(err)
 	}
 
-	_, err = database.InitDB(cfg.Database) // should get db connection and use it in context
+	db, err := database.InitDB(cfg.Database) // should get db connection and use it in context
 	if err != nil {
 		panic(err)
 	}
 
 	e := echo.New()
+
+	fl := handler.Flight{DB: db}
+	e.GET("/flight", fl.FlightGet)
 
 	if err := e.Start(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)); err != nil {
 		panic(err)
