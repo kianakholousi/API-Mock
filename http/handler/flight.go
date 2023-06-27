@@ -3,14 +3,17 @@ package handler
 import "C"
 import (
 	"flight-data-api/models"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+
 	"gorm.io/gorm"
 	"net/http"
 	"time"
 )
 
 type Flight struct {
-	DB *gorm.DB
+	DB        *gorm.DB
+	Validator *validator.Validate
 }
 
 type FlightsGetRequest struct {
@@ -31,10 +34,6 @@ func (f *Flight) Get(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Bad Request")
 	}
-
-	//if arrCity == "" || depCity == "" {
-	//	return c.JSON(http.StatusBadRequest, "Bad Request")
-	//}
 
 	var flights []models.Flight
 	err = f.DB.Debug().Joins("DepCity").
