@@ -28,7 +28,7 @@ type FlightsGetResponse struct {
 	ArrCity        models.City               `json:"arr_city"`
 	DepTime        time.Time                 `json:"dep_time"`
 	ArrTime        time.Time                 `json:"arr_time"`
-	Airplane       models.Airplane           `json:"-"`
+	Airplane       models.Airplane           `json:"airplane"`
 	Airline        string                    `json:"airline"`
 	Price          int32                     `json:"price"`
 	CxlSit         models.CancelingSituation `json:"cxl_sit"`
