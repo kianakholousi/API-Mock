@@ -50,7 +50,7 @@ func seedDB() {
 		panic(err)
 	}
 
-	cityNames := []string{"New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose"}
+	cityNames := []string{"London", "Paris", "Tokyo", "Seoul", "Sydney", "Oslo", "Berlin", "Rome", "Madrid", "Athens"}
 	cities := make([]models.City, 0, 10)
 	for i := 0; i < 10; i++ {
 		cities = append(cities, models.City{
@@ -61,7 +61,7 @@ func seedDB() {
 		panic(err)
 	}
 
-	airplaneNames := []string{"Boeing 747", "Airbus A380", "Boeing 737", "Airbus A320", "Boeing 777", "Embraer E190", "Bombardier CRJ200", "Boeing 787", "Airbus A350", "Embraer E195"}
+	airplaneNames := []string{"AirbusA320", "Boeing737", "EmbraerE190", "BombardierCRJ900", "SukhoiSSJ100", "Fokker100", "ATR72", "DeHavillandDash8", "MitsubishiMRJ", "ComacARJ21"}
 	airplanes := make([]models.Airplane, 0, 10)
 	for i := 0; i < 10; i++ {
 		airplanes = append(airplanes, models.Airplane{
@@ -98,7 +98,7 @@ func seedDB() {
 		arrCityInd = append(arrCityInd, (depCityInd[i]+rand.Intn(9)+1)%10)
 	}
 
-	airlineNames := []string{"American Airlines", "Delta Air Lines", "United Airlines", "Southwest Airlines", "JetBlue Airways", "Alaska Airlines", "Frontier Airlines", "Spirit Airlines", "Hawaiian Airlines", "Allegiant Air"}
+	airlineNames := []string{"Emirates", "QatarAirways", "EtihadAirways", "TurkishAirlines", "Lufthansa"}
 	flights := make([]models.Flight, 0, 20)
 	for i := 0; i < 20; i++ {
 		flights = append(flights, models.Flight{
@@ -107,7 +107,7 @@ func seedDB() {
 			DepTime:  depTimes[i],
 			ArrTime:  arrTimes[i],
 			Airplane: airplanes[rand.Intn(10)],
-			Airline:  airlineNames[rand.Intn(10)],
+			Airline:  airlineNames[rand.Intn(5)],
 			Price:    int32(rand.Intn(1000) + 500),
 			CxlSit:   cxlSits[rand.Intn(2)],
 			LeftSeat: int32(rand.Intn(100) + 1),
