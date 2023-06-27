@@ -17,26 +17,23 @@ type Flight struct {
 }
 
 type FlightsGetRequest struct {
-	DepCity    string    `query:"departure_city"`
-	ArrCity    string    `query:"arrival_city"`
-	DepTimeStr string    `query:"departure_time"`
-	DepTime    time.Time `query:"-"`
+	DepCity string     `query:"departure_city" validate:"required"`
+	ArrCity string     `query:"arrival_city" validate:"required"`
+	DepTime *time.Time `query:"departure_time" validate:"required"`
 }
 
 func (f *Flight) Get(c echo.Context) error {
 	var req FlightsGetRequest
 	if err := c.Bind(&req); err != nil {
-		return err
+		return c.JSONPretty(http.StatusBadRequest, "Bad Request", " ")
 	}
 
-	var err error
-	req.DepTime, err = time.Parse("2006-01-02", req.DepTimeStr)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, "Bad Request")
+	if err := f.Validator.Struct(&req); err != nil {
+		return c.JSONPretty(http.StatusBadRequest, "Bad Request", " ")
 	}
 
 	var flights []models.Flight
-	err = f.DB.Debug().Joins("DepCity").
+	err := f.DB.Debug().Joins("DepCity").
 		Where("DepCity.name = ?", req.DepCity).
 		Joins("ArrCity").Where("ArrCity.name = ?", req.ArrCity).
 		Where("year(dep_time) = ?", req.DepTime.Year()).
