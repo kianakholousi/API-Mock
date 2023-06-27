@@ -16,13 +16,13 @@ type Flight struct {
 	Validator *validator.Validate
 }
 
-type FlightsGetRequest struct {
+type GetRequest struct {
 	DepCity string     `query:"departure_city" validate:"required"`
 	ArrCity string     `query:"arrival_city" validate:"required"`
 	DepTime *time.Time `query:"departure_time" validate:"required"`
 }
 
-type FlightsGetResponse struct {
+type GetResponse struct {
 	ID             int32                     `json:"id"`
 	DepCity        models.City               `json:"dep_city"`
 	ArrCity        models.City               `json:"arr_city"`
@@ -36,7 +36,7 @@ type FlightsGetResponse struct {
 }
 
 func (f *Flight) Get(c echo.Context) error {
-	var req FlightsGetRequest
+	var req GetRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSONPretty(http.StatusBadRequest, "Bad Request", " ")
 	}
@@ -57,9 +57,9 @@ func (f *Flight) Get(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	response := make([]FlightsGetResponse, 0)
+	response := make([]GetResponse, 0, len(flights))
 	for _, val := range flights {
-		response = append(response, FlightsGetResponse{
+		response = append(response, GetResponse{
 			ID:             val.ID,
 			DepCity:        val.DepCity,
 			ArrCity:        val.ArrCity,
