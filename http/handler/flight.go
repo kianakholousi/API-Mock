@@ -13,20 +13,21 @@ type Flight struct {
 	DB *gorm.DB
 }
 
-type FlightGetRequest struct {
-	DepCity    string `query:"departure_city"`
-	ArrCity    string `query:"arrival_city"`
-	DepTimeStr string `query:"departure_time"`
-	//DepTime    time.Time `query:"-"`
+type FlightsGetRequest struct {
+	DepCity    string    `query:"departure_city"`
+	ArrCity    string    `query:"arrival_city"`
+	DepTimeStr string    `query:"departure_time"`
+	DepTime    time.Time `query:"-"`
 }
 
 func (f *Flight) Get(c echo.Context) error {
-	var FGR FlightGetRequest
-	if err := c.Bind(&FGR); err != nil {
+	var req FlightsGetRequest
+	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
-	DepTime, err := time.Parse("2006-01-02", FGR.DepTimeStr)
+	var err error
+	req.DepTime, err = time.Parse("2006-01-02", req.DepTimeStr)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "Bad Request")
 	}
@@ -36,11 +37,12 @@ func (f *Flight) Get(c echo.Context) error {
 	//}
 
 	var flights []models.Flight
-	err = f.DB.Debug().Joins("DepCity").Where("DepCity.name = ?", FGR.DepCity).
-		Joins("ArrCity").Where("ArrCity.name = ?", FGR.ArrCity).
-		Where("year(dep_time) = ?", DepTime.Year()).
-		Where("month(dep_time) = ?", DepTime.Month()).
-		Where("day(dep_time) = ?", DepTime.Day()).
+	err = f.DB.Debug().Joins("DepCity").
+		Where("DepCity.name = ?", req.DepCity).
+		Joins("ArrCity").Where("ArrCity.name = ?", req.ArrCity).
+		Where("year(dep_time) = ?", req.DepTime.Year()).
+		Where("month(dep_time) = ?", req.DepTime.Month()).
+		Where("day(dep_time) = ?", req.DepTime.Day()).
 		Find(&flights).Error
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
