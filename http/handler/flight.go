@@ -22,6 +22,21 @@ type FlightsGetRequest struct {
 	DepTime *time.Time `query:"departure_time" validate:"required"`
 }
 
+type FlightsGetResponse struct {
+	ID       int32                     `json:"id"`
+	DepCity  models.City               `json:"dep_city"`
+	ArrCity  models.City               `json:"arr_city"`
+	DepTime  time.Time                 `json:"dep_time"`
+	ArrTime  time.Time                 `json:"arr_time"`
+	Airplane models.Airplane           `json:"-"`
+	Airline  string                    `json:"airline"`
+	Price    int32                     `json:"price"`
+	CxlSit   models.CancelingSituation `json:"cxl_sit"`
+	LeftSeat int32                     `json:"left_seat"`
+	//CreatedAt time.Time                 `json:"created_at"`
+	//UpdatedAt time.Time                 `json:"updated-at"`
+}
+
 func (f *Flight) Get(c echo.Context) error {
 	var req FlightsGetRequest
 	if err := c.Bind(&req); err != nil {
@@ -44,5 +59,21 @@ func (f *Flight) Get(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSONPretty(http.StatusOK, flights, " ")
+	response := make([]FlightsGetResponse, 0)
+	for _, val := range flights {
+		response = append(response, FlightsGetResponse{
+			ID:       val.ID,
+			DepCity:  val.DepCity,
+			ArrCity:  val.ArrCity,
+			DepTime:  val.DepTime,
+			ArrTime:  val.ArrTime,
+			Airplane: val.Airplane,
+			Airline:  val.Airline,
+			Price:    val.Price,
+			CxlSit:   val.CxlSit,
+			LeftSeat: val.LeftSeat,
+		})
+	}
+
+	return c.JSONPretty(http.StatusOK, response, " ")
 }
