@@ -16,27 +16,37 @@ type Flight struct {
 	Validator *validator.Validate
 }
 
-type GetRequest struct {
+type GetFlightRequest struct {
 	DepCity string     `query:"departure_city" validate:"required"`
 	ArrCity string     `query:"arrival_city" validate:"required"`
 	DepTime *time.Time `query:"departure_time" validate:"required"`
 }
 
-type GetResponse struct {
-	ID             int32                     `json:"id"`
-	DepCity        models.City               `json:"dep_city"`
-	ArrCity        models.City               `json:"arr_city"`
-	DepTime        time.Time                 `json:"dep_time"`
-	ArrTime        time.Time                 `json:"arr_time"`
-	Airplane       models.Airplane           `json:"airplane"`
-	Airline        string                    `json:"airline"`
-	Price          int32                     `json:"price"`
-	CxlSit         models.CancelingSituation `json:"cxl_sit"`
-	RemainingSeats int32                     `json:"remaining_seats"`
+type City struct {
+	ID   int32
+	Name string
+}
+
+type Airplane struct {
+	ID   int32
+	Name string
+}
+
+type GetFlightResponse struct {
+	ID             int32     `json:"id"`
+	DepCity        City      `json:"dep_city"`
+	ArrCity        City      `json:"arr_city"`
+	DepTime        time.Time `json:"dep_time"`
+	ArrTime        time.Time `json:"arr_time"`
+	Airplane       Airplane  `json:"airplane"`
+	Airline        string    `json:"airline"`
+	Price          int32     `json:"price"`
+	CxlSitID       int32     `json:"cxl_sit_id"`
+	RemainingSeats int32     `json:"remaining_seats"`
 }
 
 func (f *Flight) Get(c echo.Context) error {
-	var req GetRequest
+	var req GetFlightRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSONPretty(http.StatusBadRequest, "Bad Request", " ")
 	}
@@ -46,8 +56,9 @@ func (f *Flight) Get(c echo.Context) error {
 	}
 
 	var flights []models.Flight
-	err := f.DB.Debug().Joins("DepCity").
-		Where("DepCity.name = ?", req.DepCity).
+	err := f.DB.Debug().
+		Joins("Airplane").
+		Joins("DepCity").Where("DepCity.name = ?", req.DepCity).
 		Joins("ArrCity").Where("ArrCity.name = ?", req.ArrCity).
 		Where("year(dep_time) = ?", req.DepTime.Year()).
 		Where("month(dep_time) = ?", req.DepTime.Month()).
@@ -57,19 +68,19 @@ func (f *Flight) Get(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	response := make([]GetResponse, 0, len(flights))
+	response := make([]GetFlightResponse, 0, len(flights))
 	for _, val := range flights {
-		response = append(response, GetResponse{
+		response = append(response, GetFlightResponse{
 			ID:             val.ID,
-			DepCity:        val.DepCity,
-			ArrCity:        val.ArrCity,
+			DepCity:        City{ID: val.DepCity.ID, Name: val.DepCity.Name},
+			ArrCity:        City{ID: val.ArrCity.ID, Name: val.ArrCity.Name},
 			DepTime:        val.DepTime,
 			ArrTime:        val.ArrTime,
-			Airplane:       val.Airplane,
+			Airplane:       Airplane{ID: val.Airplane.ID, Name: val.Airplane.Name},
 			Airline:        val.Airline,
 			Price:          val.Price,
-			CxlSit:         val.CxlSit,
-			RemainingSeats: val.LeftSeat,
+			CxlSitID:       val.CxlSitID,
+			RemainingSeats: val.RemainingSeats,
 		})
 	}
 
