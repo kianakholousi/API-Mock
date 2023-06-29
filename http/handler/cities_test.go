@@ -57,6 +57,25 @@ func (suite *GetCitiesTestSuite) CallHandler(endpoint string) (*httptest.Respons
 	return res, err
 }
 
+func (suite *GetCitiesTestSuite) TestGetCities_Success() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusOK
+	expectedMsg := `[{"id":1,"name":"Dallas"},{"id":2,"name":"Tokyo"}]`
+
+	rows := sqlmock.NewRows([]string{"id", "name", "created_at", "updated_at"}).
+		AddRow(1, "Dallas", suite.timeMock, suite.timeMock).
+		AddRow(2, "Tokyo", suite.timeMock, suite.timeMock)
+
+	suite.sqlMock.ExpectQuery("^SELECT \\* FROM `cities`$").
+		RowsWillBeClosed().
+		WillReturnRows(rows)
+
+	res, err := suite.CallHandler("/cities")
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
 func TestGetCities(t *testing.T) {
 	suite.Run(t, new(GetCitiesTestSuite))
 }
