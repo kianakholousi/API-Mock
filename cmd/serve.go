@@ -62,6 +62,9 @@ func serve() {
 	cities := handler.Cities{DB: db}
 	e.GET("/cities", cities.Get)
 
+	airplanes := handler.Airplanes{DB: db}
+	e.GET("/airplanes", airplanes.Get)
+
 	if err := e.Start(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)); err != nil {
 		panic(err)
 	}
