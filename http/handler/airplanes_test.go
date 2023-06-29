@@ -74,6 +74,17 @@ func (suite *GetAirplanesTestSuite) TestGetAirplanes_Success() {
 	require.JSONEq(expectedMsg, res.Body.String())
 }
 
+func (suite *GetCitiesTestSuite) TestGetAirplanes_Database_Failure() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusInternalServerError
+	expectedMsg := "\"Internal Server Error\"\n"
+
+	res, err := suite.CallHandler("/airplanes")
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
 func TestGetAirplanes(t *testing.T) {
 	suite.Run(t, new(GetAirplanesTestSuite))
 }
