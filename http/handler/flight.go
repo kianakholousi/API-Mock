@@ -18,7 +18,7 @@ type Flight struct {
 type GetFlightRequest struct {
 	DepCity string     `query:"departure_city" validate:"required"`
 	ArrCity string     `query:"arrival_city" validate:"required"`
-	DepTime *time.Time `query:"departure_time" validate:"required"`
+	DepTime *time.Time `query:"date" validate:"required"`
 }
 
 type City struct {
@@ -64,7 +64,7 @@ func (f *Flight) Get(c echo.Context) error {
 		Where("day(dep_time) = ?", req.DepTime.Day()).
 		Find(&flights).Error
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return c.JSON(http.StatusInternalServerError, "Internal Server Error")
 	}
 
 	response := make([]GetFlightResponse, 0, len(flights))
