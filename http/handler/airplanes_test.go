@@ -74,7 +74,7 @@ func (suite *GetAirplanesTestSuite) TestGetAirplanes_Success() {
 	require.JSONEq(expectedMsg, res.Body.String())
 }
 
-func (suite *GetCitiesTestSuite) TestGetAirplanes_Database_Failure() {
+func (suite *GetAirplanesTestSuite) TestGetAirplanes_Database_Failure() {
 	require := suite.Require()
 	expectedStatusCode := http.StatusInternalServerError
 	expectedMsg := "\"Internal Server Error\"\n"
