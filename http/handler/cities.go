@@ -2,15 +2,13 @@ package handler
 
 import (
 	"flight-data-api/models"
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 	"net/http"
 )
 
 type Cities struct {
-	DB        *gorm.DB
-	Validator *validator.Validate
+	DB *gorm.DB
 }
 
 func (c *Cities) Get(ctx echo.Context) error {

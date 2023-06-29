@@ -2,7 +2,6 @@ package handler
 
 import (
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/driver/mysql"
@@ -42,8 +41,7 @@ func (suite *GetCitiesTestSuite) SetupSuite() {
 	suite.sqlMock = sqlMock
 	suite.e = echo.New()
 	suite.cities = Cities{
-		DB:        db,
-		Validator: validator.New(),
+		DB: db,
 	}
 	suite.timeMock = time.Date(2020, time.January, 1, 2, 3, 0, 0, time.UTC)
 }
