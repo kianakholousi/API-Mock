@@ -55,7 +55,7 @@ func (suite *GetAirplanesTestSuite) CallHandler(endpoint string) (*httptest.Resp
 	return res, err
 }
 
-func (suite *GetCitiesTestSuite) TestGetAirplanes_Success() {
+func (suite *GetAirplanesTestSuite) TestGetAirplanes_Success() {
 	require := suite.Require()
 	expectedStatusCode := http.StatusOK
 	expectedMsg := `[{"id":1,"name":"AirbusA320"},{"id":2,"name":"Boeing737"}]`
@@ -64,7 +64,7 @@ func (suite *GetCitiesTestSuite) TestGetAirplanes_Success() {
 		AddRow(1, "AirbusA320", suite.timeMock, suite.timeMock).
 		AddRow(2, "Boeing737", suite.timeMock, suite.timeMock)
 
-	suite.sqlMock.ExpectQuery("^SELECT \\* FROM `cities`$").
+	suite.sqlMock.ExpectQuery("^SELECT \\* FROM `airplanes`$").
 		RowsWillBeClosed().
 		WillReturnRows(rows)
 
