@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-type Flight struct {
+type Flights struct {
 	DB        *gorm.DB
 	Validator *validator.Validate
 }
@@ -22,8 +22,8 @@ type GetFlightRequest struct {
 }
 
 type City struct {
-	ID   int32
-	Name string
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
 }
 
 type Airplane struct {
@@ -44,7 +44,7 @@ type GetFlightResponse struct {
 	RemainingSeats int32     `json:"remaining_seats"`
 }
 
-func (f *Flight) Get(c echo.Context) error {
+func (f *Flights) Get(c echo.Context) error {
 	var req GetFlightRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, "Bad Request")

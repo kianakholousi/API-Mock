@@ -19,7 +19,7 @@ type GetFlightsTestSuite struct {
 	suite.Suite
 	sqlMock  sqlmock.Sqlmock
 	e        *echo.Echo
-	flight   Flight
+	flight   Flights
 	timeMock time.Time
 }
 
@@ -41,7 +41,7 @@ func (suite *GetFlightsTestSuite) SetupSuite() {
 
 	suite.sqlMock = sqlMock
 	suite.e = echo.New()
-	suite.flight = Flight{
+	suite.flight = Flights{
 		DB:        db,
 		Validator: validator.New(),
 	}
@@ -61,7 +61,7 @@ func (suite *GetFlightsTestSuite) TestGetFlights_OneFlight_Success() {
 	require := suite.Require()
 	expectedStatusCode := http.StatusOK
 	expectedMsgTime := suite.timeMock
-	expectedMsg := `[{"id":2,"dep_city":{"ID":9,"Name":"Dallas"},"arr_city":{"ID":6,"Name":"Philadelphia"},"dep_time":"` + expectedMsgTime.Format("2006-01-02T15:04:05.999999999Z07:00") + `","arr_time":"` + expectedMsgTime.Format("2006-01-02T15:04:05.999999999Z07:00") + `","airplane":{"ID":8,"Name":"Boeing 787"},"airline":"Southwest Airlines","price":1257,"cxl_sit_id":1,"remaining_seats":67}]`
+	expectedMsg := `[{"id":2,"dep_city":{"id":9,"name":"Dallas"},"arr_city":{"id":6,"name":"Philadelphia"},"dep_time":"` + expectedMsgTime.Format("2006-01-02T15:04:05.999999999Z07:00") + `","arr_time":"` + expectedMsgTime.Format("2006-01-02T15:04:05.999999999Z07:00") + `","airplane":{"ID":8,"Name":"Boeing 787"},"airline":"Southwest Airlines","price":1257,"cxl_sit_id":1,"remaining_seats":67}]`
 
 	rows := sqlmock.NewRows([]string{"id", "dep_city_id", "arr_city_id", "dep_time", "arr_time", "airplane_id", "airline", "price", "cxl_sit_id", "remaining_seats", "Airplane__id", "Airplane__name", "DepCity__id", "DepCity__name", "ArrCity__id", "ArrCity__name"}).
 		AddRow(2, 9, 6, expectedMsgTime, expectedMsgTime, 8, "Southwest Airlines", 1257, 1, 67, 8, "Boeing 787", 9, "Dallas", 6, "Philadelphia")
@@ -81,8 +81,8 @@ func (suite *GetFlightsTestSuite) TestGetFlights_MultipleFlights_Success() {
 	require := suite.Require()
 	expectedStatusCode := http.StatusOK
 	expectedMsgTime := suite.timeMock
-	expectedMsg := `[{"id":2,"dep_city":{"ID":10,"Name":"Tehran"},"arr_city":{"ID":6,"Name":"Philadelphia"},"dep_time":"` + expectedMsgTime.Format("2006-01-02T15:04:05.999999999Z07:00") + `","arr_time":"` + expectedMsgTime.Format("2006-01-02T15:04:05.999999999Z07:00") + `","airplane":{"ID":8,"Name":"Boeing 787"},"airline":"Southwest Airlines","price":1257,"cxl_sit_id":1,"remaining_seats":67},
-					{"id":3,"dep_city":{"ID":10,"Name":"Tehran"},"arr_city":{"ID":6,"Name":"Philadelphia"},"dep_time":"` + expectedMsgTime.Format("2006-01-02T15:04:05.999999999Z07:00") + `","arr_time":"` + expectedMsgTime.Format("2006-01-02T15:04:05.999999999Z07:00") + `","airplane":{"ID":9,"Name":"Boeing 747"},"airline":"Iran Air","price":1258,"cxl_sit_id":2,"remaining_seats":68}]`
+	expectedMsg := `[{"id":2,"dep_city":{"id":10,"name":"Tehran"},"arr_city":{"id":6,"name":"Philadelphia"},"dep_time":"` + expectedMsgTime.Format("2006-01-02T15:04:05.999999999Z07:00") + `","arr_time":"` + expectedMsgTime.Format("2006-01-02T15:04:05.999999999Z07:00") + `","airplane":{"ID":8,"Name":"Boeing 787"},"airline":"Southwest Airlines","price":1257,"cxl_sit_id":1,"remaining_seats":67},
+					{"id":3,"dep_city":{"id":10,"name":"Tehran"},"arr_city":{"id":6,"name":"Philadelphia"},"dep_time":"` + expectedMsgTime.Format("2006-01-02T15:04:05.999999999Z07:00") + `","arr_time":"` + expectedMsgTime.Format("2006-01-02T15:04:05.999999999Z07:00") + `","airplane":{"ID":9,"Name":"Boeing 747"},"airline":"Iran Air","price":1258,"cxl_sit_id":2,"remaining_seats":68}]`
 
 	rows := sqlmock.NewRows([]string{"id", "dep_city_id", "arr_city_id", "dep_time", "arr_time", "airplane_id", "airline", "price", "cxl_sit_id", "remaining_seats", "Airplane__id", "Airplane__name", "DepCity__id", "DepCity__name", "ArrCity__id", "ArrCity__name"}).
 		AddRow(2, 10, 6, expectedMsgTime, expectedMsgTime, 8, "Southwest Airlines", 1257, 1, 67, 8, "Boeing 787", 10, "Tehran", 6, "Philadelphia").
