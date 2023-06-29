@@ -1,6 +1,5 @@
 package handler
 
-import "C"
 import (
 	"flight-data-api/models"
 	"github.com/go-playground/validator/v10"
@@ -48,7 +47,7 @@ type GetFlightResponse struct {
 func (f *Flight) Get(c echo.Context) error {
 	var req GetFlightRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSONPretty(http.StatusBadRequest, "Bad Request", " ")
+		return c.JSON(http.StatusBadRequest, "Bad Request")
 	}
 
 	if err := f.Validator.Struct(&req); err != nil {
