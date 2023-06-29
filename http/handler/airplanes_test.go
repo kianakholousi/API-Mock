@@ -55,6 +55,25 @@ func (suite *GetAirplanesTestSuite) CallHandler(endpoint string) (*httptest.Resp
 	return res, err
 }
 
+func (suite *GetCitiesTestSuite) TestGetAirplanes_Success() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusOK
+	expectedMsg := `[{"id":1,"name":"AirbusA320"},{"id":2,"name":"Boeing737"}]`
+
+	rows := sqlmock.NewRows([]string{"id", "name", "created_at", "updated_at"}).
+		AddRow(1, "AirbusA320", suite.timeMock, suite.timeMock).
+		AddRow(2, "Boeing737", suite.timeMock, suite.timeMock)
+
+	suite.sqlMock.ExpectQuery("^SELECT \\* FROM `cities`$").
+		RowsWillBeClosed().
+		WillReturnRows(rows)
+
+	res, err := suite.CallHandler("/airplanes")
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
 func TestGetAirplanes(t *testing.T) {
-	suite.Run(t, new(GetCitiesTestSuite))
+	suite.Run(t, new(GetAirplanesTestSuite))
 }
