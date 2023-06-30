@@ -31,7 +31,7 @@ type Airplane struct {
 	Name string
 }
 
-type GetFlightResponse struct {
+type GetFlightsResponse struct {
 	ID             int32     `json:"id"`
 	DepCity        City      `json:"dep_city"`
 	ArrCity        City      `json:"arr_city"`
@@ -67,9 +67,9 @@ func (f *Flight) Get(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "Internal Server Error")
 	}
 
-	response := make([]GetFlightResponse, 0, len(flights))
+	response := make([]GetFlightsResponse, 0, len(flights))
 	for _, val := range flights {
-		response = append(response, GetFlightResponse{
+		response = append(response, GetFlightsResponse{
 			ID:             val.ID,
 			DepCity:        City{ID: val.DepCity.ID, Name: val.DepCity.Name},
 			ArrCity:        City{ID: val.ArrCity.ID, Name: val.ArrCity.Name},
