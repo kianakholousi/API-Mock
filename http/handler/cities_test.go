@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
@@ -18,7 +19,7 @@ type GetCitiesTestSuite struct {
 	suite.Suite
 	sqlMock  sqlmock.Sqlmock
 	e        *echo.Echo
-	cities   Cities
+	cities   City
 	timeMock time.Time
 }
 
@@ -40,7 +41,7 @@ func (suite *GetCitiesTestSuite) SetupSuite() {
 
 	suite.sqlMock = sqlMock
 	suite.e = echo.New()
-	suite.cities = Cities{
+	suite.cities = City{
 		DB: db,
 	}
 	suite.timeMock = time.Date(2020, time.January, 1, 2, 3, 0, 0, time.UTC)
@@ -78,6 +79,9 @@ func (suite *GetCitiesTestSuite) TestGetCities_Database_Failure() {
 	require := suite.Require()
 	expectedStatusCode := http.StatusInternalServerError
 	expectedMsg := "\"Internal Server Error\"\n"
+
+	suite.sqlMock.ExpectQuery("^SELECT \\* FROM `cities`$").
+		WillReturnError(errors.New("error"))
 
 	res, err := suite.CallHandler("/cities")
 	require.NoError(err)
