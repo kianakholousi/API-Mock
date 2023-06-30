@@ -11,6 +11,7 @@ require (
 	github.com/stretchr/testify v1.8.3
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.1
+	syreclabs.com/go/faker v1.2.3
 )
 
 require (
