@@ -15,7 +15,7 @@ type Flight struct {
 	Validator *validator.Validate
 }
 
-type GetFlightRequest struct {
+type GetFlightsRequest struct {
 	DepCity string     `query:"departure_city" validate:"required"`
 	ArrCity string     `query:"arrival_city" validate:"required"`
 	DepTime *time.Time `query:"date" validate:"required"`
@@ -45,7 +45,7 @@ type GetFlightsResponse struct {
 }
 
 func (f *Flight) Get(c echo.Context) error {
-	var req GetFlightRequest
+	var req GetFlightsRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, "Bad Request")
 	}
