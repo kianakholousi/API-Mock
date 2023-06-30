@@ -11,6 +11,11 @@ type Cities struct {
 	DB *gorm.DB
 }
 
+type GetCitiesResponse struct {
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
+}
+
 func (c *Cities) Get(ctx echo.Context) error {
 	var cities []models.City
 	err := c.DB.Debug().Find(&cities).Error
@@ -18,9 +23,9 @@ func (c *Cities) Get(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, "Internal Server Error")
 	}
 
-	response := make([]City, 0, len(cities))
+	response := make([]GetCitiesResponse, 0, len(cities))
 	for _, val := range cities {
-		response = append(response, City{ID: val.ID, Name: val.Name})
+		response = append(response, GetCitiesResponse{ID: val.ID, Name: val.Name})
 	}
 
 	return ctx.JSON(http.StatusOK, response)
