@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-type Flights struct {
+type Flight struct {
 	DB        *gorm.DB
 	Validator *validator.Validate
 }
@@ -22,8 +22,8 @@ type GetFlightsRequest struct {
 }
 
 type Airplane struct {
-	ID   int32
-	Name string
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
 }
 
 type GetFlightsResponse struct {
@@ -39,14 +39,14 @@ type GetFlightsResponse struct {
 	RemainingSeats int32             `json:"remaining_seats"`
 }
 
-func (f *Flights) Get(c echo.Context) error {
+func (f *Flight) Get(ctx echo.Context) error {
 	var req GetFlightsRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, "Bad Request")
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
 	}
 
 	if err := f.Validator.Struct(&req); err != nil {
-		return c.JSONPretty(http.StatusBadRequest, "Bad Request", " ")
+		return ctx.JSONPretty(http.StatusBadRequest, "Bad Request", " ")
 	}
 
 	var flights []models.Flight
@@ -59,7 +59,7 @@ func (f *Flights) Get(c echo.Context) error {
 		Where("day(dep_time) = ?", req.DepTime.Day()).
 		Find(&flights).Error
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, "Internal Server Error")
+		return ctx.JSON(http.StatusInternalServerError, "Internal Server Error")
 	}
 
 	response := make([]GetFlightsResponse, 0, len(flights))
@@ -78,5 +78,5 @@ func (f *Flights) Get(c echo.Context) error {
 		})
 	}
 
-	return c.JSONPretty(http.StatusOK, response, " ")
+	return ctx.JSONPretty(http.StatusOK, response, " ")
 }

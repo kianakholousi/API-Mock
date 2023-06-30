@@ -19,6 +19,6 @@ type Flight struct {
 	CxlSitID       int32              `gorm:"column:cxl_sit_id;not null" json:"cxl_sit_id"`
 	CxlSit         CancelingSituation `gorm:"foreignKey:CxlSitID"`
 	RemainingSeats int32              `gorm:"column:remaining_seats;not null" json:"remaining_seats"`
-	CreatedAt      time.Time          `gorm:"column:created_at;default:CURRENT_TIMESTAMP"`
-	UpdatedAt      time.Time          `gorm:"column:updated_at;default:CURRENT_TIMESTAMP"`
+	CreatedAt      time.Time          `gorm:"column:created_at;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt      time.Time          `gorm:"column:updated_at;default:CURRENT_TIMESTAMP" json:"updated_at"`
 }

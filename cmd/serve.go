@@ -56,7 +56,7 @@ func serve() {
 
 	vldt := validator.New()
 
-	flights := handler.Flights{DB: db, Validator: vldt}
+	flights := handler.Flight{DB: db, Validator: vldt}
 	e.GET("/flights", flights.Get)
 
 	cities := handler.Cities{DB: db}
