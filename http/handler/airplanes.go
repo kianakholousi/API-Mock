@@ -11,6 +11,11 @@ type Airplanes struct {
 	DB *gorm.DB
 }
 
+type GetAirplanesResponse struct {
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
+}
+
 func (a *Airplanes) Get(ctx echo.Context) error {
 	var airplanes []models.Airplane
 	err := a.DB.Debug().Find(&airplanes).Error
@@ -18,9 +23,9 @@ func (a *Airplanes) Get(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, "Internal Server Error")
 	}
 
-	response := make([]Airplane, 0, len(airplanes))
+	response := make([]GetAirplanesResponse, 0, len(airplanes))
 	for _, val := range airplanes {
-		response = append(response, Airplane{ID: val.ID, Name: val.Name})
+		response = append(response, GetAirplanesResponse{ID: val.ID, Name: val.Name})
 	}
 
 	return ctx.JSON(http.StatusOK, response)

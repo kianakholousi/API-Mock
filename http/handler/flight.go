@@ -15,37 +15,27 @@ type Flights struct {
 	Validator *validator.Validate
 }
 
-type GetFlightRequest struct {
+type GetFlightsRequest struct {
 	DepCity string     `query:"departure_city" validate:"required"`
 	ArrCity string     `query:"arrival_city" validate:"required"`
 	DepTime *time.Time `query:"date" validate:"required"`
 }
 
-type City struct {
-	ID   int32  `json:"id"`
-	Name string `json:"name"`
-}
-
-type Airplane struct {
-	ID   int32  `json:"id"`
-	Name string `json:"name"`
-}
-
 type GetFlightResponse struct {
-	ID             int32     `json:"id"`
-	DepCity        City      `json:"dep_city"`
-	ArrCity        City      `json:"arr_city"`
-	DepTime        time.Time `json:"dep_time"`
-	ArrTime        time.Time `json:"arr_time"`
-	Airplane       Airplane  `json:"airplane"`
-	Airline        string    `json:"airline"`
-	Price          int32     `json:"price"`
-	CxlSitID       int32     `json:"cxl_sit_id"`
-	RemainingSeats int32     `json:"remaining_seats"`
+	ID             int32                `json:"id"`
+	DepCity        GetCitiesResponse    `json:"dep_city"`
+	ArrCity        GetCitiesResponse    `json:"arr_city"`
+	DepTime        time.Time            `json:"dep_time"`
+	ArrTime        time.Time            `json:"arr_time"`
+	Airplane       GetAirplanesResponse `json:"airplane"`
+	Airline        string               `json:"airline"`
+	Price          int32                `json:"price"`
+	CxlSitID       int32                `json:"cxl_sit_id"`
+	RemainingSeats int32                `json:"remaining_seats"`
 }
 
 func (f *Flights) Get(c echo.Context) error {
-	var req GetFlightRequest
+	var req GetFlightsRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, "Bad Request")
 	}
@@ -71,11 +61,11 @@ func (f *Flights) Get(c echo.Context) error {
 	for _, val := range flights {
 		response = append(response, GetFlightResponse{
 			ID:             val.ID,
-			DepCity:        City{ID: val.DepCity.ID, Name: val.DepCity.Name},
-			ArrCity:        City{ID: val.ArrCity.ID, Name: val.ArrCity.Name},
+			DepCity:        GetCitiesResponse{ID: val.DepCity.ID, Name: val.DepCity.Name},
+			ArrCity:        GetCitiesResponse{ID: val.ArrCity.ID, Name: val.ArrCity.Name},
 			DepTime:        val.DepTime,
 			ArrTime:        val.ArrTime,
-			Airplane:       Airplane{ID: val.Airplane.ID, Name: val.Airplane.Name},
+			Airplane:       GetAirplanesResponse{ID: val.Airplane.ID, Name: val.Airplane.Name},
 			Airline:        val.Airline,
 			Price:          val.Price,
 			CxlSitID:       val.CxlSitID,
