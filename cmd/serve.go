@@ -3,7 +3,9 @@ package cmd
 import (
 	"flight-data-api/config"
 	"flight-data-api/database"
+	"flight-data-api/http/handler"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/spf13/cobra"
 )
@@ -45,12 +47,16 @@ func serve() {
 		panic(err)
 	}
 
-	_, err = database.InitDB(cfg.Database) // should get db connection and use it in context
+	db, err := database.InitDB(cfg.Database) // should get db connection and use it in context
 	if err != nil {
 		panic(err)
 	}
 
 	e := echo.New()
+
+	vldt := validator.New()
+	flight := handler.Flight{DB: db, Validator: vldt}
+	e.GET("/flights", flight.Get)
 
 	if err := e.Start(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)); err != nil {
 		panic(err)

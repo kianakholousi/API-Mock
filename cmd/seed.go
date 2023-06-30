@@ -110,7 +110,7 @@ func seedDB() {
 			Airline:  airlineNames[rand.Intn(5)],
 			Price:    int32(rand.Intn(1000) + 500),
 			CxlSit:   cxlSits[rand.Intn(2)],
-			LeftSeat: int32(rand.Intn(100) + 1),
+			RemainingSeats: int32(rand.Intn(100) + 1),
 		})
 	}
 	if err := db.Create(flights).Error; err != nil {

@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS flights (
     airline varchar(255) NOT NULL ,
     price int NOT NULL ,
     cxl_sit_id int NOT NULL ,
-    left_seat int NOT NULL,
+    remaining_seats int NOT NULL,
     created_at datetime DEFAULT NOW(),
     updated_at datetime DEFAULT NOW() ON UPDATE NOW(),
 
