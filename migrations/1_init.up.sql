@@ -21,6 +21,14 @@ CREATE TABLE IF NOT EXISTS canceling_situations (
     updated_at datetime DEFAULT NOW() ON UPDATE NOW()
 );
 
+CREATE TABLE IF NOT EXISTS flights_days (
+    id int PRIMARY KEY AUTO_INCREMENT,
+    dep_time datetime NOT NULL ,
+    arr_time datetime NOT NULL ,
+    created_at datetime DEFAULT NOW(),
+    updated_at datetime DEFAULT NOW() ON UPDATE NOW()
+);
+
 CREATE TABLE IF NOT EXISTS flights (
     id int PRIMARY KEY AUTO_INCREMENT,
     dep_city_id int NOT NULL ,
