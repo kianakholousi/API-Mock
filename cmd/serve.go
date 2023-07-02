@@ -55,8 +55,12 @@ func serve() {
 	e := echo.New()
 
 	vldt := validator.New()
-	flight := handler.Flight{DB: db, Validator: vldt}
-	e.GET("/flights", flight.Get)
+
+	flights := handler.Flight{DB: db, Validator: vldt}
+	e.GET("/flights", flights.Get)
+
+	cities := handler.City{DB: db}
+	e.GET("/cities", cities.Get)
 
 	if err := e.Start(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)); err != nil {
 		panic(err)

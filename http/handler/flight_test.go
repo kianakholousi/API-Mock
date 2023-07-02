@@ -92,7 +92,7 @@ func (suite *GetFlightsTestSuite) TestGetFlights_MultipleFlights_Success() {
 		WillReturnRows(rows)
 	err := suite.sqlMock.ExpectationsWereMet()
 
-	res, err := suite.CallHandler("/flights?departure_city=Tehran&arrival_city=Philadelphia&date=2020-11-24T00:00:00Z")
+	res, err := suite.CallHandler("?departure_city=Tehran&arrival_city=Philadelphia&date=2020-11-24T00:00:00Z")
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.JSONEq(expectedMsg, res.Body.String())
@@ -103,7 +103,7 @@ func (suite *GetFlightsTestSuite) TestGetFlights_MissingDepCityParameter_Failure
 	expectedStatusCode := http.StatusBadRequest
 	expectedMsg := "\"Bad Request\"\n"
 
-	res, err := suite.CallHandler("/flights?arrival_city=Philadelphia&date=2020-11-24T00:00:00Z")
+	res, err := suite.CallHandler("?arrival_city=Philadelphia&date=2020-11-24T00:00:00Z")
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.Equal(expectedMsg, res.Body.String())
@@ -114,7 +114,7 @@ func (suite *GetFlightsTestSuite) TestGetFlights_MissingArrCityParameter_Failure
 	expectedStatusCode := http.StatusBadRequest
 	expectedMsg := "\"Bad Request\"\n"
 
-	res, err := suite.CallHandler("/flights?departure_city=Philadelphia&date=2020-11-24T00:00:00Z")
+	res, err := suite.CallHandler("?departure_city=Philadelphia&date=2020-11-24T00:00:00Z")
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.Equal(expectedMsg, res.Body.String())
@@ -125,7 +125,7 @@ func (suite *GetFlightsTestSuite) TestGetFlights_MissingDateParameter_Failure() 
 	expectedStatusCode := http.StatusBadRequest
 	expectedMsg := "\"Bad Request\"\n"
 
-	res, err := suite.CallHandler("/flights?departure_city=Dallas^arrival_city=Yazd")
+	res, err := suite.CallHandler("?departure_city=Dallas^arrival_city=Yazd")
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.Equal(expectedMsg, res.Body.String())
@@ -141,7 +141,7 @@ func (suite *GetFlightsTestSuite) TestGetFlights_Database_Failure() {
 		WithArgs("Tokyo", "Philadelphia", 2020, 11, 24).
 		WillReturnError(errors.New("error"))
 
-	res, err := suite.CallHandler("/flights?departure_city=Tokyo&arrival_city=Philadelphia&date=2020-11-24T00:00:00Z")
+	res, err := suite.CallHandler("?departure_city=Tokyo&arrival_city=Philadelphia&date=2020-11-24T00:00:00Z")
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.JSONEq(expectedMsg, res.Body.String())

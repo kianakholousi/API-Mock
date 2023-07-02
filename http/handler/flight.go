@@ -21,27 +21,22 @@ type GetFlightsRequest struct {
 	DepTime *time.Time `query:"date" validate:"required"`
 }
 
-type City struct {
-	ID   int32  `json:"id"`
-	Name string `json:"name"`
-}
-
 type Airplane struct {
 	ID   int32  `json:"id"`
 	Name string `json:"name"`
 }
 
 type GetFlightsResponse struct {
-	ID             int32     `json:"id"`
-	DepCity        City      `json:"dep_city"`
-	ArrCity        City      `json:"arr_city"`
-	DepTime        time.Time `json:"dep_time"`
-	ArrTime        time.Time `json:"arr_time"`
-	Airplane       Airplane  `json:"airplane"`
-	Airline        string    `json:"airline"`
-	Price          int32     `json:"price"`
-	CxlSitID       int32     `json:"cxl_sit_id"`
-	RemainingSeats int32     `json:"remaining_seats"`
+	ID             int32             `json:"id"`
+	DepCity        GetCitiesResponse `json:"dep_city"`
+	ArrCity        GetCitiesResponse `json:"arr_city"`
+	DepTime        time.Time         `json:"dep_time"`
+	ArrTime        time.Time         `json:"arr_time"`
+	Airplane       Airplane          `json:"airplane"`
+	Airline        string            `json:"airline"`
+	Price          int32             `json:"price"`
+	CxlSitID       int32             `json:"cxl_sit_id"`
+	RemainingSeats int32             `json:"remaining_seats"`
 }
 
 func (f *Flight) Get(ctx echo.Context) error {
@@ -71,8 +66,8 @@ func (f *Flight) Get(ctx echo.Context) error {
 	for _, val := range flights {
 		response = append(response, GetFlightsResponse{
 			ID:             val.ID,
-			DepCity:        City{ID: val.DepCity.ID, Name: val.DepCity.Name},
-			ArrCity:        City{ID: val.ArrCity.ID, Name: val.ArrCity.Name},
+			DepCity:        GetCitiesResponse{ID: val.DepCity.ID, Name: val.DepCity.Name},
+			ArrCity:        GetCitiesResponse{ID: val.ArrCity.ID, Name: val.ArrCity.Name},
 			DepTime:        val.DepTime,
 			ArrTime:        val.ArrTime,
 			Airplane:       Airplane{ID: val.Airplane.ID, Name: val.Airplane.Name},

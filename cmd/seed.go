@@ -102,14 +102,14 @@ func seedDB() {
 	flights := make([]models.Flight, 0, 20)
 	for i := 0; i < 20; i++ {
 		flights = append(flights, models.Flight{
-			DepCity:  cities[depCityInd[i]],
-			ArrCity:  cities[arrCityInd[i]],
-			DepTime:  depTimes[i],
-			ArrTime:  arrTimes[i],
-			Airplane: airplanes[rand.Intn(10)],
-			Airline:  airlineNames[rand.Intn(5)],
-			Price:    int32(rand.Intn(1000) + 500),
-			CxlSit:   cxlSits[rand.Intn(2)],
+			DepCity:        cities[depCityInd[i]],
+			ArrCity:        cities[arrCityInd[i]],
+			DepTime:        depTimes[i],
+			ArrTime:        arrTimes[i],
+			Airplane:       airplanes[rand.Intn(10)],
+			Airline:        airlineNames[rand.Intn(5)],
+			Price:          int32(rand.Intn(1000) + 500),
+			CxlSit:         cxlSits[rand.Intn(2)],
 			RemainingSeats: int32(rand.Intn(100) + 1),
 		})
 	}
