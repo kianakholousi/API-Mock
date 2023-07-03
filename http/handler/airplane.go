@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-type Airplanes struct {
+type Airplane struct {
 	DB *gorm.DB
 }
 
@@ -16,7 +16,7 @@ type GetAirplanesResponse struct {
 	Name string `json:"name"`
 }
 
-func (a *Airplanes) Get(ctx echo.Context) error {
+func (a *Airplane) Get(ctx echo.Context) error {
 	var airplanes []models.Airplane
 	err := a.DB.Debug().Find(&airplanes).Error
 	if err != nil {

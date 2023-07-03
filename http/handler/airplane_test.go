@@ -18,7 +18,7 @@ type GetAirplanesTestSuite struct {
 	suite.Suite
 	sqlMock   sqlmock.Sqlmock
 	e         *echo.Echo
-	airplanes Airplanes
+	airplanes Airplane
 	timeMock  time.Time
 }
 
@@ -38,7 +38,7 @@ func (suite *GetAirplanesTestSuite) SetupSuite() {
 
 	suite.sqlMock = sqlMock
 	suite.e = echo.New()
-	suite.airplanes = Airplanes{
+	suite.airplanes = Airplane{
 		DB: db,
 	}
 	suite.timeMock = time.Date(2020, time.January, 1, 2, 3, 0, 0, time.UTC)
