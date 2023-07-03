@@ -47,8 +47,8 @@ func (suite *GetCitiesTestSuite) SetupSuite() {
 	suite.timeMock = time.Date(2020, time.January, 1, 2, 3, 0, 0, time.UTC)
 }
 
-func (suite *GetCitiesTestSuite) CallHandler(endpoint string) (*httptest.ResponseRecorder, error) {
-	req := httptest.NewRequest(http.MethodGet, endpoint, strings.NewReader(""))
+func (suite *GetCitiesTestSuite) CallHandler() (*httptest.ResponseRecorder, error) {
+	req := httptest.NewRequest(http.MethodGet, "/cities", strings.NewReader(""))
 	res := httptest.NewRecorder()
 	c := suite.e.NewContext(req, res)
 	err := suite.cities.Get(c)
@@ -69,7 +69,7 @@ func (suite *GetCitiesTestSuite) TestGetCities_Success() {
 		RowsWillBeClosed().
 		WillReturnRows(rows)
 
-	res, err := suite.CallHandler("/cities")
+	res, err := suite.CallHandler()
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.JSONEq(expectedMsg, res.Body.String())
@@ -83,7 +83,7 @@ func (suite *GetCitiesTestSuite) TestGetCities_Database_Failure() {
 	suite.sqlMock.ExpectQuery("^SELECT \\* FROM `cities`$").
 		WillReturnError(errors.New("error"))
 
-	res, err := suite.CallHandler("/cities")
+	res, err := suite.CallHandler()
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.JSONEq(expectedMsg, res.Body.String())

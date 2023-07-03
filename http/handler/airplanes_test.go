@@ -28,12 +28,10 @@ func (suite *GetAirplanesTestSuite) SetupSuite() {
 		log.Fatal(err)
 	}
 
-	cfg := mysql.Config{
+	db, err := gorm.Open(mysql.New(mysql.Config{
 		Conn:                      mockDB,
 		SkipInitializeWithVersion: true,
-	}
-
-	db, err := gorm.Open(mysql.New(cfg))
+	}))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,8 +44,8 @@ func (suite *GetAirplanesTestSuite) SetupSuite() {
 	suite.timeMock = time.Date(2020, time.January, 1, 2, 3, 0, 0, time.UTC)
 }
 
-func (suite *GetAirplanesTestSuite) CallHandler(endpoint string) (*httptest.ResponseRecorder, error) {
-	req := httptest.NewRequest(http.MethodGet, endpoint, strings.NewReader(""))
+func (suite *GetAirplanesTestSuite) CallHandler() (*httptest.ResponseRecorder, error) {
+	req := httptest.NewRequest(http.MethodGet, "/airplanes", strings.NewReader(""))
 	res := httptest.NewRecorder()
 	c := suite.e.NewContext(req, res)
 	err := suite.airplanes.Get(c)
@@ -68,7 +66,7 @@ func (suite *GetAirplanesTestSuite) TestGetAirplanes_Success() {
 		RowsWillBeClosed().
 		WillReturnRows(rows)
 
-	res, err := suite.CallHandler("/airplanes")
+	res, err := suite.CallHandler()
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.JSONEq(expectedMsg, res.Body.String())
@@ -79,7 +77,7 @@ func (suite *GetAirplanesTestSuite) TestGetAirplanes_Database_Failure() {
 	expectedStatusCode := http.StatusInternalServerError
 	expectedMsg := "\"Internal Server Error\"\n"
 
-	res, err := suite.CallHandler("/airplanes")
+	res, err := suite.CallHandler()
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.JSONEq(expectedMsg, res.Body.String())
