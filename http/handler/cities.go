@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-type Cities struct {
+type City struct {
 	DB *gorm.DB
 }
 
@@ -16,7 +16,7 @@ type GetCitiesResponse struct {
 	Name string `json:"name"`
 }
 
-func (c *Cities) Get(ctx echo.Context) error {
+func (c *City) Get(ctx echo.Context) error {
 	var cities []models.City
 	err := c.DB.Debug().Find(&cities).Error
 	if err != nil {
