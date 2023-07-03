@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
@@ -15,80 +14,75 @@ import (
 	"time"
 )
 
-type GetCitiesTestSuite struct {
+type GetAirplanesTestSuite struct {
 	suite.Suite
-	sqlMock  sqlmock.Sqlmock
-	e        *echo.Echo
-	cities   City
-	timeMock time.Time
+	sqlMock   sqlmock.Sqlmock
+	e         *echo.Echo
+	airplanes Airplane
+	timeMock  time.Time
 }
 
-func (suite *GetCitiesTestSuite) SetupSuite() {
+func (suite *GetAirplanesTestSuite) SetupSuite() {
 	mockDB, sqlMock, err := sqlmock.New()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cfg := mysql.Config{
+	db, err := gorm.Open(mysql.New(mysql.Config{
 		Conn:                      mockDB,
 		SkipInitializeWithVersion: true,
-	}
-
-	db, err := gorm.Open(mysql.New(cfg))
+	}))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	suite.sqlMock = sqlMock
 	suite.e = echo.New()
-	suite.cities = City{
+	suite.airplanes = Airplane{
 		DB: db,
 	}
 	suite.timeMock = time.Date(2020, time.January, 1, 2, 3, 0, 0, time.UTC)
 }
 
-func (suite *GetCitiesTestSuite) CallHandler(endpoint string) (*httptest.ResponseRecorder, error) {
-	req := httptest.NewRequest(http.MethodGet, endpoint, strings.NewReader(""))
+func (suite *GetAirplanesTestSuite) CallHandler() (*httptest.ResponseRecorder, error) {
+	req := httptest.NewRequest(http.MethodGet, "/airplanes", strings.NewReader(""))
 	res := httptest.NewRecorder()
 	c := suite.e.NewContext(req, res)
-	err := suite.cities.Get(c)
+	err := suite.airplanes.Get(c)
 
 	return res, err
 }
 
-func (suite *GetCitiesTestSuite) TestGetCities_Success() {
+func (suite *GetAirplanesTestSuite) TestGetAirplanes_Success() {
 	require := suite.Require()
 	expectedStatusCode := http.StatusOK
-	expectedMsg := `[{"id":1,"name":"Dallas"},{"id":2,"name":"Tokyo"}]`
+	expectedMsg := `[{"id":1,"name":"AirbusA320"},{"id":2,"name":"Boeing737"}]`
 
 	rows := sqlmock.NewRows([]string{"id", "name", "created_at", "updated_at"}).
-		AddRow(1, "Dallas", suite.timeMock, suite.timeMock).
-		AddRow(2, "Tokyo", suite.timeMock, suite.timeMock)
+		AddRow(1, "AirbusA320", suite.timeMock, suite.timeMock).
+		AddRow(2, "Boeing737", suite.timeMock, suite.timeMock)
 
-	suite.sqlMock.ExpectQuery("^SELECT \\* FROM `cities`$").
+	suite.sqlMock.ExpectQuery("^SELECT \\* FROM `airplanes`$").
 		RowsWillBeClosed().
 		WillReturnRows(rows)
 
-	res, err := suite.CallHandler("/cities")
+	res, err := suite.CallHandler()
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.JSONEq(expectedMsg, res.Body.String())
 }
 
-func (suite *GetCitiesTestSuite) TestGetCities_Database_Failure() {
+func (suite *GetAirplanesTestSuite) TestGetAirplanes_Database_Failure() {
 	require := suite.Require()
 	expectedStatusCode := http.StatusInternalServerError
 	expectedMsg := "\"Internal Server Error\"\n"
 
-	suite.sqlMock.ExpectQuery("^SELECT \\* FROM `cities`$").
-		WillReturnError(errors.New("error"))
-
-	res, err := suite.CallHandler("/cities")
+	res, err := suite.CallHandler()
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.JSONEq(expectedMsg, res.Body.String())
 }
 
-func TestGetCities(t *testing.T) {
-	suite.Run(t, new(GetCitiesTestSuite))
+func TestGetAirplanes(t *testing.T) {
+	suite.Run(t, new(GetAirplanesTestSuite))
 }
