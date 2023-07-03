@@ -97,7 +97,8 @@ func seedDB() {
 		depCityInd = append(depCityInd, rand.Intn(10))
 		arrCityInd = append(arrCityInd, (depCityInd[i]+rand.Intn(9)+1)%10)
 	}
-
+	
+	flightClassName := []string{"firstClass", "businessClass", "economyClass"}
 	airlineNames := []string{"Emirates", "QatarAirways", "EtihadAirways", "TurkishAirlines", "Lufthansa"}
 	flights := make([]models.Flight, 0, 20)
 	for i := 0; i < 20; i++ {
@@ -110,6 +111,7 @@ func seedDB() {
 			Airline:        airlineNames[rand.Intn(5)],
 			Price:          int32(rand.Intn(1000) + 500),
 			CxlSit:         cxlSits[rand.Intn(2)],
+			FlightClass:    flightClassName[rand.Intn(3)],
 			RemainingSeats: int32(rand.Intn(100) + 1),
 		})
 	}
