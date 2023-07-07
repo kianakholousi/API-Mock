@@ -40,7 +40,7 @@ type GetFlightsResponse struct {
 	RemainingSeats int32             `json:"remaining_seats"`
 }
 
-func (f *Flight) Get(ctx echo.Context) error {
+func (f *Flight) GetFlights(ctx echo.Context) error {
 	var req GetFlightsRequest
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, "Bad Request")
@@ -82,15 +82,11 @@ func (f *Flight) Get(ctx echo.Context) error {
 	return ctx.JSONPretty(http.StatusOK, response, " ")
 }
 
-type FlightsDates struct {
-	DB *gorm.DB
-}
-
 type GetFlightsDatesResponse struct {
 	Dates []string
 }
 
-func (f *FlightsDates) Get(ctx echo.Context) error {
+func (f *Flight) GetDates(ctx echo.Context) error {
 	var dates []time.Time
 	err := f.DB.Debug().
 		Model(&models.Flight{}).

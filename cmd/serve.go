@@ -57,13 +57,11 @@ func serve() {
 	vldt := validator.New()
 
 	flights := handler.Flight{DB: db, Validator: vldt}
-	e.GET("/flights", flights.Get)
+	e.GET("/flights", flights.GetFlights)
+	e.GET("/flights/dates", flights.GetDates)
 
 	cities := handler.City{DB: db}
 	e.GET("/cities", cities.Get)
-
-	flightsDates := handler.FlightsDates{DB: db}
-	e.GET("/flights/dates", flightsDates.Get)
 
 	if err := e.Start(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)); err != nil {
 		panic(err)

@@ -3,7 +3,6 @@ module flight-data-api
 go 1.20
 
 require (
-	bou.ke/monkey v1.0.2
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/go-playground/validator/v10 v10.14.1
 	github.com/go-sql-driver/mysql v1.7.0
