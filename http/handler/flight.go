@@ -4,8 +4,6 @@ import (
 	"flight-data-api/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-	"sort"
-
 	"gorm.io/gorm"
 	"net/http"
 	"time"
@@ -103,8 +101,5 @@ func (f *Flight) GetDates(ctx echo.Context) error {
 		response.Dates = append(response.Dates, date.Format("2006-01-02"))
 	}
 
-	sort.Slice(response.Dates, func(i, j int) bool {
-		return response.Dates[i] < response.Dates[j]
-	})
 	return ctx.JSONPretty(http.StatusOK, response, " ")
 }
