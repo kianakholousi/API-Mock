@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"API-Mock/models"
 	"errors"
+	"flight-data-api/models"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 	"net/http"
@@ -14,17 +14,13 @@ type FlightDetail struct {
 }
 
 func (f *FlightDetail) Get(c echo.Context) error {
-	// Convert param (string) to int
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid ID")
 	}
 
-	// Initialize struct
 	var flight models.Flight
-
-	// Find flight by ID, select only FlightClass field
-	result := f.DB.Select("flight_class").First(&flight, id)
+	result := f.DB.Model(&models.Flight{}).Select("id = ?", id).Find(&flight)
 
 	// If record not found
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -36,4 +32,3 @@ func (f *FlightDetail) Get(c echo.Context) error {
 	// If all went well, return the FlightClass
 	return c.JSON(http.StatusOK, flight.FlightClass)
 }
-

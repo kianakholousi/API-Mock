@@ -62,8 +62,8 @@ func serve() {
 	cities := handler.City{DB: db}
 	e.GET("/cities", cities.Get)
 
-	flightdetails := handler.FlightDetail{DB: db}
-	e.GET("/flights/:id", flightdetails.Get)
+	flightDetail := handler.FlightDetail{DB: db}
+	e.GET("/flights/:id", flightDetail.Get)
 
 	if err := e.Start(fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)); err != nil {
 		panic(err)
