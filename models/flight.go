@@ -21,8 +21,8 @@ type Flight struct {
 	RemainingSeats   int32              `gorm:"column:remaining_seats;not null" json:"remaining_seats"`
 	FlightClass      string             `gorm:"column:flight_class;not null" json:"flight_class"`
 	BaggageAllowance int32              `gorm:"column:baggage_allowance;not null" json:"baggage_allowance"`
-	MealService      string
-	GateNumber       int32
-	CreatedAt        time.Time `gorm:"column:created_at;default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt        time.Time `gorm:"column:updated_at;default:CURRENT_TIMESTAMP" json:"updated_at"`
+	MealService      string             `gorm:"column:meal_service;not null" json:"meal_service"`
+	GateNumber       int32              `gorm:"column:gate_number;not null" json:"gate_number"`
+	CreatedAt        time.Time          `gorm:"column:created_at;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt        time.Time          `gorm:"column:updated_at;default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
