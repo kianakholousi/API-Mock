@@ -98,3 +98,7 @@ func (f *Flight) GetDates(ctx echo.Context) error {
 
 	return ctx.JSONPretty(http.StatusOK, response, " ")
 }
+
+func (f *Flight) GetFlightDetail(ctx echo.Context) error {
+	return ctx.JSON(http.StatusAccepted, "Accepted")
+}
