@@ -232,7 +232,7 @@ func (suite *GetDatesTestSuite) TestGetDates_Database_Failure() {
 	expectedStatusCode := http.StatusInternalServerError
 	expectedMsg := "\"Internal Server Error\"\n"
 
-	var reqStr string = "^SELECT DISTINCT DATE\\(dep_time\\) FROM `flights`$"
+	var reqStr = "^SELECT DISTINCT DATE\\(dep_time\\) FROM `flights`$"
 	suite.sqlMock.ExpectQuery(reqStr).
 		WillReturnError(errors.New("error"))
 
