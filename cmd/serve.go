@@ -57,10 +57,14 @@ func serve() {
 	vldt := validator.New()
 
 	flights := handler.Flight{DB: db, Validator: vldt}
-	e.GET("/flights", flights.Get)
+	e.GET("/flights", flights.GetFlights)
+	e.GET("/flights/dates", flights.GetDates)
 
-	cities := handler.City{DB: db}
-	e.GET("/cities", cities.Get)
+	city := handler.City{DB: db}
+	e.GET("/cities", city.Get)
+
+	airplane := handler.Airplane{DB: db}
+	e.GET("/airplanes", airplane.Get)
 
 	flightDetail := handler.FlightDetail{DB: db}
 	e.GET("/flights/:id", flightDetail.Get)

@@ -4,7 +4,6 @@ import (
 	"flight-data-api/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-
 	"gorm.io/gorm"
 	"net/http"
 	"time"
@@ -21,25 +20,20 @@ type GetFlightsRequest struct {
 	DepTime *time.Time `query:"date" validate:"required"`
 }
 
-type Airplane struct {
-	ID   int32  `json:"id"`
-	Name string `json:"name"`
-}
-
 type GetFlightsResponse struct {
-	ID             int32             `json:"id"`
-	DepCity        GetCitiesResponse `json:"dep_city"`
-	ArrCity        GetCitiesResponse `json:"arr_city"`
-	DepTime        time.Time         `json:"dep_time"`
-	ArrTime        time.Time         `json:"arr_time"`
-	Airplane       Airplane          `json:"airplane"`
-	Airline        string            `json:"airline"`
-	Price          int32             `json:"price"`
-	CxlSitID       int32             `json:"cxl_sit_id"`
-	RemainingSeats int32             `json:"remaining_seats"`
+	ID             int32                `json:"id"`
+	DepCity        GetCitiesResponse    `json:"dep_city"`
+	ArrCity        GetCitiesResponse    `json:"arr_city"`
+	DepTime        time.Time            `json:"dep_time"`
+	ArrTime        time.Time            `json:"arr_time"`
+	Airplane       GetAirplanesResponse `json:"airplane"`
+	Airline        string               `json:"airline"`
+	Price          int32                `json:"price"`
+	CxlSitID       int32                `json:"cxl_sit_id"`
+	RemainingSeats int32                `json:"remaining_seats"`
 }
 
-func (f *Flight) Get(ctx echo.Context) error {
+func (f *Flight) GetFlights(ctx echo.Context) error {
 	var req GetFlightsRequest
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, "Bad Request")
@@ -70,12 +64,36 @@ func (f *Flight) Get(ctx echo.Context) error {
 			ArrCity:        GetCitiesResponse{ID: val.ArrCity.ID, Name: val.ArrCity.Name},
 			DepTime:        val.DepTime,
 			ArrTime:        val.ArrTime,
-			Airplane:       Airplane{ID: val.Airplane.ID, Name: val.Airplane.Name},
+			Airplane:       GetAirplanesResponse{ID: val.Airplane.ID, Name: val.Airplane.Name},
 			Airline:        val.Airline,
 			Price:          val.Price,
 			CxlSitID:       val.CxlSitID,
 			RemainingSeats: val.RemainingSeats,
 		})
+	}
+
+	return ctx.JSONPretty(http.StatusOK, response, " ")
+}
+
+type GetFlightsDatesResponse struct {
+	Dates []string
+}
+
+func (f *Flight) GetDates(ctx echo.Context) error {
+	var dates []time.Time
+	err := f.DB.Debug().
+		Model(&models.Flight{}).
+		Distinct("DATE(dep_time)").
+		Scan(&dates).
+		Error
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, "Internal Server Error")
+	}
+
+	var response GetFlightsDatesResponse
+	response.Dates = make([]string, 0, len(dates))
+	for _, date := range dates {
+		response.Dates = append(response.Dates, date.Format("2006-01-02"))
 	}
 
 	return ctx.JSONPretty(http.StatusOK, response, " ")
