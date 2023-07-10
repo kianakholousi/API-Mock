@@ -52,8 +52,8 @@ func (suite *GetFlightsTestSuite) SetupSuite() {
 func (suite *GetFlightsTestSuite) CallHandler(query string) (*httptest.ResponseRecorder, error) {
 	req := httptest.NewRequest(http.MethodGet, "/flights"+query, strings.NewReader(""))
 	res := httptest.NewRecorder()
-	c := suite.e.NewContext(req, res)
-	err := suite.flight.GetFlights(c)
+	ctx := suite.e.NewContext(req, res)
+	err := suite.flight.GetFlights(ctx)
 
 	return res, err
 }
@@ -150,6 +150,101 @@ func (suite *GetFlightsTestSuite) TestGetFlights_Database_Failure() {
 
 func TestGetFlights(t *testing.T) {
 	suite.Run(t, new(GetFlightsTestSuite))
+}
+
+type GetDatesTestSuite struct {
+	suite.Suite
+	sqlMock   sqlmock.Sqlmock
+	e         *echo.Echo
+	flight    Flight
+	timeMock1 time.Time
+	timeMock2 time.Time
+}
+
+func (suite *GetDatesTestSuite) SetupSuite() {
+	mockDB, sqlMock, err := sqlmock.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      mockDB,
+		SkipInitializeWithVersion: true,
+	}))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	suite.sqlMock = sqlMock
+	suite.e = echo.New()
+	suite.flight = Flight{
+		DB:        db,
+		Validator: validator.New(),
+	}
+	suite.timeMock1 = time.Date(2020, time.January, 1, 2, 3, 0, 0, time.UTC)
+	suite.timeMock2 = time.Date(2021, time.January, 1, 2, 3, 0, 0, time.UTC)
+
+}
+
+func (suite *GetDatesTestSuite) CallHandler() (*httptest.ResponseRecorder, error) {
+	req := httptest.NewRequest(http.MethodGet, "/flights/dates", strings.NewReader(""))
+	res := httptest.NewRecorder()
+	ctx := suite.e.NewContext(req, res)
+	err := suite.flight.GetDates(ctx)
+
+	return res, err
+}
+
+func (suite *GetDatesTestSuite) TestGetDates_OneDate_Success() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusOK
+	expectedMsg := `{"Dates":["2020-01-01"]}`
+	rows := sqlmock.NewRows([]string{"dep_time"}).
+		AddRow(suite.timeMock1)
+	var reqStr = "^SELECT DISTINCT DATE\\(dep_time\\) FROM `flights`$"
+	suite.sqlMock.ExpectQuery(reqStr).WillReturnRows(rows)
+
+	res, err := suite.CallHandler()
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+
+}
+
+func (suite *GetDatesTestSuite) TestGetDates_MultipleDates_Success() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusOK
+	expectedMsg := `{"Dates":["2020-01-01", "2021-01-01"]}`
+	rows := sqlmock.NewRows([]string{"dep_time"}).
+		AddRow(suite.timeMock1).
+		AddRow(suite.timeMock2)
+	var reqStr = "^SELECT DISTINCT DATE\\(dep_time\\) FROM `flights`$"
+	suite.sqlMock.ExpectQuery(reqStr).WillReturnRows(rows)
+
+	res, err := suite.CallHandler()
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+
+}
+
+func (suite *GetDatesTestSuite) TestGetDates_Database_Failure() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusInternalServerError
+	expectedMsg := "\"Internal Server Error\"\n"
+
+	var reqStr = "^SELECT DISTINCT DATE\\(dep_time\\) FROM `flights`$"
+	suite.sqlMock.ExpectQuery(reqStr).
+		WillReturnError(errors.New("error"))
+
+	res, err := suite.CallHandler()
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func TestGetDates(t *testing.T) {
+	suite.Run(t, new(GetDatesTestSuite))
 }
 
 type CancelReservationTestSuite struct {
