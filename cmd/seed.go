@@ -97,22 +97,28 @@ func seedDB() {
 		depCityInd = append(depCityInd, rand.Intn(10))
 		arrCityInd = append(arrCityInd, (depCityInd[i]+rand.Intn(9)+1)%10)
 	}
-	
-	flightClassName := []string{"firstClass", "businessClass", "economyClass"}
+
+	flightClassName := []string{"First Class", "Business Class", "Economy Class"}
 	airlineNames := []string{"Emirates", "QatarAirways", "EtihadAirways", "TurkishAirlines", "Lufthansa"}
+	baggageAllowance := []string{"2 bags, 32kg each", "2 bags, 23kg each", "1 bag, 23kg"}
+	mealService := []string{"Gourmet meals", "A la carte menus", "Snacks and drinks"}
+	gateName := []string{"A1", "B2", "C3", "D4", "E5"}
 	flights := make([]models.Flight, 0, 20)
 	for i := 0; i < 20; i++ {
 		flights = append(flights, models.Flight{
-			DepCity:        cities[depCityInd[i]],
-			ArrCity:        cities[arrCityInd[i]],
-			DepTime:        depTimes[i],
-			ArrTime:        arrTimes[i],
-			Airplane:       airplanes[rand.Intn(10)],
-			Airline:        airlineNames[rand.Intn(5)],
-			Price:          int32(rand.Intn(1000) + 500),
-			CxlSit:         cxlSits[rand.Intn(2)],
-			FlightClass:    flightClassName[rand.Intn(3)],
-			RemainingSeats: int32(rand.Intn(100) + 1),
+			DepCity:          cities[depCityInd[i]],
+			ArrCity:          cities[arrCityInd[i]],
+			DepTime:          depTimes[i],
+			ArrTime:          arrTimes[i],
+			Airplane:         airplanes[rand.Intn(10)],
+			Airline:          airlineNames[rand.Intn(5)],
+			Price:            int32(rand.Intn(1000) + 500),
+			CxlSit:           cxlSits[rand.Intn(2)],
+			FlightClass:      flightClassName[rand.Intn(3)],
+			BaggageAllowance: baggageAllowance[rand.Intn(len(baggageAllowance))],
+			MealService:      mealService[rand.Intn(len(mealService))],
+			Gate:             gateName[rand.Intn(len(gateName))],
+			RemainingSeats:   int32(rand.Intn(100) + 1),
 		})
 	}
 	if err := db.Create(flights).Error; err != nil {
