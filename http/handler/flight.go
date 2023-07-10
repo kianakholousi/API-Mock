@@ -99,6 +99,65 @@ func (f *Flight) GetDates(ctx echo.Context) error {
 	return ctx.JSONPretty(http.StatusOK, response, " ")
 }
 
+type GetFlightDetailRequest struct {
+	FlightId int `json:"flight_id" validate:"required"`
+}
+
+type GetFlightDetailResponse struct {
+	ID               int32                `json:"id"`
+	DepCity          GetCitiesResponse    `json:"dep_city"`
+	ArrCity          GetCitiesResponse    `json:"arr_city"`
+	DepTime          time.Time            `json:"dep_time"`
+	ArrTime          time.Time            `json:"arr_time"`
+	Airplane         GetAirplanesResponse `json:"airplane"`
+	Airline          string               `json:"airline"`
+	Price            int32                `json:"price"`
+	CxlSitID         int32                `json:"cxl_sit_id"`
+	RemainingSeats   int32                `json:"remaining_seats"`
+	FlightClass      string               `json:"flight_class"`
+	BaggageAllowance string               `json:"baggage_allowance"`
+	MealService      string               `json:"meal_service"`
+	Gate             string               `json:"gate_number"`
+}
+
 func (f *Flight) GetFlightDetail(ctx echo.Context) error {
-	return ctx.JSON(http.StatusAccepted, "Accepted")
+	var req GetFlightDetailRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+	}
+
+	if err := f.Validator.Struct(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+	}
+
+	var flight models.Flight
+	err := f.DB.Debug().
+		Model(&models.Flight{}).
+		Where("id = ?", req.FlightId).
+		First(&flight).
+		Error
+	if err != nil && err == gorm.ErrRecordNotFound {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+	} else if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, "Internal Server Error")
+	}
+
+	response := GetFlightDetailResponse{
+		ID:               flight.ID,
+		DepCity:          GetCitiesResponse{ID: flight.DepCity.ID, Name: flight.DepCity.Name},
+		ArrCity:          GetCitiesResponse{ID: flight.ArrCity.ID, Name: flight.ArrCity.Name},
+		DepTime:          flight.DepTime,
+		ArrTime:          flight.ArrTime,
+		Airplane:         GetAirplanesResponse{ID: flight.Airplane.ID, Name: flight.Airplane.Name},
+		Airline:          flight.Airline,
+		Price:            flight.Price,
+		CxlSitID:         flight.CxlSitID,
+		RemainingSeats:   flight.RemainingSeats,
+		FlightClass:      flight.FlightClass,
+		BaggageAllowance: flight.BaggageAllowance,
+		MealService:      flight.MealService,
+		Gate:             flight.Gate,
+	}
+
+	return ctx.JSON(http.StatusOK, response)
 }
