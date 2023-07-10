@@ -98,3 +98,44 @@ func (f *Flight) GetDates(ctx echo.Context) error {
 
 	return ctx.JSONPretty(http.StatusOK, response, " ")
 }
+
+type CancelReservationRequest struct {
+	FlightId int `json:"flight_id" validate:"required"`
+	Count    int `json:"count" validate:"required"`
+}
+
+func (f *Flight) CancelReservation(ctx echo.Context) error {
+	var req CancelReservationRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+	}
+
+	if err := f.Validator.Struct(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+	}
+
+	var flight models.Flight
+	err := f.DB.Debug().
+		Model(&models.Flight{}).
+		Where("id = ?", req.FlightId).
+		First(&flight).
+		Error
+	if err != nil && err == gorm.ErrRecordNotFound {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+	} else if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, "Internal Server Error")
+	}
+
+	flight.RemainingSeats += (int32)(req.Count)
+
+	err = f.DB.Debug().
+		Model(&models.Flight{}).
+		Where("id = ?", req.FlightId).
+		Save(&flight).
+		Error
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return ctx.JSON(http.StatusAccepted, "Accepted")
+}
