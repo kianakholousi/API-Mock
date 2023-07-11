@@ -22,7 +22,7 @@ type Flight struct {
 	FlightClass      string             `gorm:"column:flight_class;not null" json:"flight_class"`
 	BaggageAllowance string             `gorm:"column:baggage_allowance;not null" json:"baggage_allowance"`
 	MealService      string             `gorm:"column:meal_service;not null" json:"meal_service"`
-	Gate             string             `gorm:"column:gate_number;not null" json:"gate_number"`
+	Gate             string             `gorm:"column:gate;not null" json:"gate_number"`
 	CreatedAt        time.Time          `gorm:"column:created_at;default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt        time.Time          `gorm:"column:updated_at;default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
