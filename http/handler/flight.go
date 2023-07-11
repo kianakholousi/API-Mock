@@ -40,7 +40,7 @@ func (f *Flight) GetFlights(ctx echo.Context) error {
 	}
 
 	if err := f.Validator.Struct(&req); err != nil {
-		return ctx.JSONPretty(http.StatusBadRequest, "Bad Request", " ")
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
 	}
 
 	var flights []models.Flight
@@ -117,7 +117,7 @@ type GetFlightDetailResponse struct {
 	FlightClass      string               `json:"flight_class"`
 	BaggageAllowance string               `json:"baggage_allowance"`
 	MealService      string               `json:"meal_service"`
-	Gate             string               `json:"gate_number"`
+	Gate             string               `json:"gate"`
 }
 
 func (f *Flight) GetFlightDetail(ctx echo.Context) error {
@@ -133,7 +133,10 @@ func (f *Flight) GetFlightDetail(ctx echo.Context) error {
 	var flight models.Flight
 	err := f.DB.Debug().
 		Model(&models.Flight{}).
-		Where("id = ?", req.FlightId).
+		Joins("Airplane").
+		Joins("DepCity").
+		Joins("ArrCity").
+		Where("flights.id = ?", req.FlightId).
 		First(&flight).
 		Error
 	if err != nil && err == gorm.ErrRecordNotFound {
