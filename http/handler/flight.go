@@ -136,7 +136,7 @@ func (f *Flight) CancelReservation(ctx echo.Context) error {
 		Update("remaining_seats", flight.RemainingSeats+(int32)(req.Count)).
 		Error
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, err.Error())
+		return ctx.JSON(http.StatusInternalServerError, "Internal Server Error")
 	}
 
 	return ctx.JSON(http.StatusAccepted, "Accepted")
