@@ -59,6 +59,7 @@ func serve() {
 	flights := handler.Flight{DB: db, Validator: vldt}
 	e.GET("/flights", flights.GetFlights)
 	e.GET("/flights/dates", flights.GetDates)
+	e.POST("flights/reserve", flights.Reserve)
 
 	city := handler.City{DB: db}
 	e.GET("/cities", city.Get)
