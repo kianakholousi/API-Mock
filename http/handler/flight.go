@@ -2,6 +2,7 @@ package handler
 
 import (
 	"flight-data-api/models"
+	"flight-data-api/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -15,9 +16,9 @@ type Flight struct {
 }
 
 type GetFlightsRequest struct {
-	DepCity string     `query:"departure_city" validate:"required"`
-	ArrCity string     `query:"arrival_city" validate:"required"`
-	DepTime *time.Time `query:"date" validate:"required"`
+	DepCity string `query:"departure_city" validate:"required"`
+	ArrCity string `query:"arrival_city" validate:"required"`
+	DepTime string `query:"date" validate:"required"`
 }
 
 type GetFlightsResponse struct {
@@ -43,14 +44,18 @@ func (f *Flight) GetFlights(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, "Bad Request")
 	}
 
+	depTime, err := utils.ParseDate(req.DepTime)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+	}
 	var flights []models.Flight
-	err := f.DB.Debug().
+	err = f.DB.Debug().
 		Joins("Airplane").
 		Joins("DepCity").Where("DepCity.name = ?", req.DepCity).
 		Joins("ArrCity").Where("ArrCity.name = ?", req.ArrCity).
-		Where("year(dep_time) = ?", req.DepTime.Year()).
-		Where("month(dep_time) = ?", req.DepTime.Month()).
-		Where("day(dep_time) = ?", req.DepTime.Day()).
+		Where("year(dep_time) = ?", depTime.Year()).
+		Where("month(dep_time) = ?", depTime.Month()).
+		Where("day(dep_time) = ?", depTime.Day()).
 		Find(&flights).Error
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, "Internal Server Error")
@@ -208,6 +213,44 @@ func (f *Flight) Reserve(ctx echo.Context) error {
 			Error
 	}
 
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, "Internal Server Error")
+	}
+
+	return ctx.JSON(http.StatusAccepted, "Accepted")
+}
+
+type CancelReservationRequest struct {
+	FlightId int `json:"flight_id" validate:"required"`
+	Count    int `json:"count" validate:"required"`
+}
+
+func (f *Flight) CancelReservation(ctx echo.Context) error {
+	var req CancelReservationRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+	}
+
+	if err := f.Validator.Struct(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+	}
+
+	var flight models.Flight
+	err := f.DB.Debug().
+		Model(&models.Flight{}).
+		Where("id = ?", req.FlightId).
+		First(&flight).
+		Error
+	if err != nil && err == gorm.ErrRecordNotFound {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+	} else if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, "Internal Server Error")
+	}
+
+	err = f.DB.Debug().Model(&models.Flight{}).
+		Where("id = ?", req.FlightId).
+		Update("remaining_seats", flight.RemainingSeats+(int32)(req.Count)).
+		Error
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, "Internal Server Error")
 	}

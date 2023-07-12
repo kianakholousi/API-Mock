@@ -70,7 +70,7 @@ func (suite *GetFlightsTestSuite) TestGetFlights_OneFlight_Success() {
 		WithArgs("Dallas", "Philadelphia", 2020, 11, 24).
 		WillReturnRows(rows)
 
-	res, err := suite.CallHandler("?departure_city=Dallas&arrival_city=Philadelphia&date=2020-11-24T00:00:00Z")
+	res, err := suite.CallHandler("?departure_city=Dallas&arrival_city=Philadelphia&date=2020-11-24")
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.JSONEq(expectedMsg, res.Body.String())
@@ -93,7 +93,7 @@ func (suite *GetFlightsTestSuite) TestGetFlights_MultipleFlights_Success() {
 		WillReturnRows(rows)
 	err := suite.sqlMock.ExpectationsWereMet()
 
-	res, err := suite.CallHandler("?departure_city=Tehran&arrival_city=Philadelphia&date=2020-11-24T00:00:00Z")
+	res, err := suite.CallHandler("?departure_city=Tehran&arrival_city=Philadelphia&date=2020-11-24")
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.JSONEq(expectedMsg, res.Body.String())
@@ -142,7 +142,7 @@ func (suite *GetFlightsTestSuite) TestGetFlights_Database_Failure() {
 		WithArgs("Tokyo", "Philadelphia", 2020, 11, 24).
 		WillReturnError(errors.New("error"))
 
-	res, err := suite.CallHandler("?departure_city=Tokyo&arrival_city=Philadelphia&date=2020-11-24T00:00:00Z")
+	res, err := suite.CallHandler("?departure_city=Tokyo&arrival_city=Philadelphia&date=2020-11-24")
 	require.NoError(err)
 	require.Equal(expectedStatusCode, res.Code)
 	require.JSONEq(expectedMsg, res.Body.String())
@@ -514,4 +514,124 @@ func (suite *ReserveTestSuite) TestReserve_Database_Failure() {
 
 func TestReserve(t *testing.T) {
 	suite.Run(t, new(ReserveTestSuite))
+}
+
+type CancelReservationTestSuite struct {
+	suite.Suite
+	sqlMock  sqlmock.Sqlmock
+	e        *echo.Echo
+	flight   Flight
+	timeMock time.Time
+}
+
+func (suite *CancelReservationTestSuite) SetupSuite() {
+	mockDB, sqlMock, err := sqlmock.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      mockDB,
+		SkipInitializeWithVersion: true,
+	}))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	monkey.Patch(time.Now, func() time.Time {
+		return time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+	})
+
+	suite.sqlMock = sqlMock
+	suite.e = echo.New()
+	suite.flight = Flight{
+		DB:        db,
+		Validator: validator.New(),
+	}
+
+	suite.timeMock = time.Date(2020, time.January, 1, 2, 3, 0, 0, time.UTC)
+}
+
+func (suite *CancelReservationTestSuite) TearDownSuite() {
+	monkey.UnpatchAll()
+}
+
+func (suite *CancelReservationTestSuite) CallHandler(body string) (*httptest.ResponseRecorder, error) {
+	req := httptest.NewRequest(http.MethodPost, "/flights/cancel", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	c := suite.e.NewContext(req, res)
+	err := suite.flight.CancelReservation(c)
+
+	return res, err
+}
+
+func (suite *CancelReservationTestSuite) TestCancelReservation_Success() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusAccepted
+	expectedMsg := "\"Accepted\"\n"
+	rows := sqlmock.NewRows([]string{"id", "dep_city_id", "arr_city_id", "dep_time", "arr_time", "airplane_id", "airline", "price", "cxl_sit_id", "remaining_seats", "Airplane__id", "Airplane__name", "DepCity__id", "DepCity__name", "ArrCity__id", "ArrCity__name"}).
+		AddRow(1, 9, 6, suite.timeMock, suite.timeMock, 8, "Southwest Airlines", 1257, 1, 67, 8, "Boeing 787", 9, "Dallas", 6, "Philadelphia")
+
+	reqStr := "^SELECT \\* FROM `flights` WHERE id \\= \\? ORDER BY `flights`\\.`id` LIMIT 1$"
+	suite.sqlMock.ExpectQuery(reqStr).
+		WithArgs(1).
+		WillReturnRows(rows)
+
+	reqStr = "^UPDATE `flights` SET `remaining_seats`\\=\\?,`updated_at`\\=\\? WHERE id = \\?"
+	suite.sqlMock.ExpectBegin()
+	suite.sqlMock.ExpectExec(reqStr).
+		WithArgs(77, time.Now(), 1).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	suite.sqlMock.ExpectCommit()
+
+	reqBody := "{\"flight_id\":1, \"count\":10}"
+	res, err := suite.CallHandler(reqBody)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func (suite *CancelReservationTestSuite) TestCancelReservation_MissingFlightId_Failure() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusBadRequest
+	expectedMsg := "\"Bad Request\"\n"
+
+	reqBody := `{"count":10}`
+	res, err := suite.CallHandler(reqBody)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func (suite *CancelReservationTestSuite) TestCancelReservation_MissingCount_Failure() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusBadRequest
+	expectedMsg := "\"Bad Request\"\n"
+
+	reqBody := `{"flight_id":10}`
+	res, err := suite.CallHandler(reqBody)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func (suite *CancelReservationTestSuite) TestCancelReservation_Database_Failure() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusInternalServerError
+	expectedMsg := "\"Internal Server Error\"\n"
+
+	reqStr := "^SELECT \\* FROM `flights` WHERE id \\= \\? ORDER BY `flights`\\.`id` LIMIT 1$"
+	suite.sqlMock.ExpectQuery(reqStr).
+		WillReturnError(errors.New("error"))
+
+	reqBody := "{\"flight_id\":1, \"count\":10}"
+	res, err := suite.CallHandler(reqBody)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func TestCancelReservation(t *testing.T) {
+	suite.Run(t, new(CancelReservationTestSuite))
 }
