@@ -164,3 +164,53 @@ func (f *Flight) GetFlightDetail(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, response)
 }
+
+type ReserveRequest struct {
+	FlightId int `json:"flight_id" validate:"required"`
+	Count    int `json:"count" validate:"required"`
+}
+
+func (f *Flight) Reserve(ctx echo.Context) error {
+	var req ReserveRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+	}
+
+	if err := f.Validator.Struct(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+	}
+
+	var flight models.Flight
+	err := f.DB.Debug().
+		Model(&models.Flight{}).
+		Where("id = ?", req.FlightId).
+		First(&flight).
+		Error
+	if err != nil && err == gorm.ErrRecordNotFound {
+		return ctx.JSON(http.StatusBadRequest, "Bad Request")
+	} else if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, "Internal Server Error")
+	}
+
+	if flight.RemainingSeats < (int32)(req.Count) {
+		return ctx.JSON(http.StatusBadRequest, "Not Enough Seats")
+	}
+
+	if flight.RemainingSeats == (int32)(req.Count) {
+		err = f.DB.Debug().Model(&models.Flight{}).
+			Where("id = ?", req.FlightId).
+			Delete(models.Flight{}).
+			Error
+	} else {
+		err = f.DB.Debug().Model(&models.Flight{}).
+			Where("id = ?", req.FlightId).
+			Update("remaining_seats", flight.RemainingSeats-(int32)(req.Count)).
+			Error
+	}
+
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, "Internal Server Error")
+	}
+
+	return ctx.JSON(http.StatusAccepted, "Accepted")
+}

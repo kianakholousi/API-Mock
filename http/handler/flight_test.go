@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bou.ke/monkey"
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/go-playground/validator/v10"
@@ -348,4 +349,169 @@ func (suite *GetFlightDetailTestSuite) TestGetFlightDetail_Database_Failure() {
 
 func TestGetFlightDetail(t *testing.T) {
 	suite.Run(t, new(GetFlightDetailTestSuite))
+}
+
+type ReserveTestSuite struct {
+	suite.Suite
+	sqlMock  sqlmock.Sqlmock
+	e        *echo.Echo
+	flight   Flight
+	timeMock time.Time
+}
+
+func (suite *ReserveTestSuite) SetupSuite() {
+	mockDB, sqlMock, err := sqlmock.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      mockDB,
+		SkipInitializeWithVersion: true,
+	}))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	monkey.Patch(time.Now, func() time.Time {
+		return time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+	})
+
+	suite.sqlMock = sqlMock
+	suite.e = echo.New()
+	suite.flight = Flight{
+		DB:        db,
+		Validator: validator.New(),
+	}
+
+	suite.timeMock = time.Date(2020, time.January, 1, 2, 3, 0, 0, time.UTC)
+}
+
+func (suite *ReserveTestSuite) TearDownSuite() {
+	monkey.UnpatchAll()
+}
+
+func (suite *ReserveTestSuite) CallHandler(body string) (*httptest.ResponseRecorder, error) {
+	req := httptest.NewRequest(http.MethodPost, "/flights/reserve", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	ctx := suite.e.NewContext(req, res)
+	err := suite.flight.Reserve(ctx)
+
+	return res, err
+}
+
+func (suite *ReserveTestSuite) TestReserve_HaveMoreSeats_Success() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusAccepted
+	expectedMsg := "\"Accepted\"\n"
+	rows := sqlmock.NewRows([]string{"id", "dep_city_id", "arr_city_id", "dep_time", "arr_time", "airplane_id", "airline", "price", "cxl_sit_id", "remaining_seats", "Airplane__id", "Airplane__name", "DepCity__id", "DepCity__name", "ArrCity__id", "ArrCity__name"}).
+		AddRow(1, 9, 6, suite.timeMock, suite.timeMock, 8, "Southwest Airlines", 1257, 1, 67, 8, "Boeing 787", 9, "Dallas", 6, "Philadelphia")
+
+	reqStr := "^SELECT \\* FROM `flights` WHERE id \\= \\? ORDER BY `flights`\\.`id` LIMIT 1$"
+	suite.sqlMock.ExpectQuery(reqStr).
+		WithArgs(1).
+		WillReturnRows(rows)
+
+	reqStr = "^UPDATE `flights` SET `remaining_seats`\\=\\?,`updated_at`\\=\\? WHERE id = \\?"
+	suite.sqlMock.ExpectBegin()
+	suite.sqlMock.ExpectExec(reqStr).
+		WithArgs(57, time.Now(), 1).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	suite.sqlMock.ExpectCommit()
+
+	reqBody := "{\"flight_id\":1, \"count\":10}"
+	res, err := suite.CallHandler(reqBody)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func (suite *ReserveTestSuite) TestReserve_HaveOnlyEnoughSeats_Success() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusAccepted
+	expectedMsg := "\"Accepted\"\n"
+	rows := sqlmock.NewRows([]string{"id", "dep_city_id", "arr_city_id", "dep_time", "arr_time", "airplane_id", "airline", "price", "cxl_sit_id", "remaining_seats", "Airplane__id", "Airplane__name", "DepCity__id", "DepCity__name", "ArrCity__id", "ArrCity__name"}).
+		AddRow(1, 9, 6, suite.timeMock, suite.timeMock, 8, "Southwest Airlines", 1257, 1, 67, 8, "Boeing 787", 9, "Dallas", 6, "Philadelphia")
+
+	reqStr := "^SELECT \\* FROM `flights` WHERE id \\= \\? ORDER BY `flights`\\.`id` LIMIT 1$"
+	suite.sqlMock.ExpectQuery(reqStr).
+		WithArgs(1).
+		WillReturnRows(rows)
+
+	reqStr = "^DELETE FROM `flights` WHERE id = \\?"
+	suite.sqlMock.ExpectBegin()
+	suite.sqlMock.ExpectExec(reqStr).
+		WithArgs(1).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+	suite.sqlMock.ExpectCommit()
+
+	reqBody := "{\"flight_id\":1, \"count\":67}"
+	res, err := suite.CallHandler(reqBody)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func (suite *ReserveTestSuite) TestReserve_NotEnoughSeats_Success() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusBadRequest
+	expectedMsg := "\"Not Enough Seats\"\n"
+	rows := sqlmock.NewRows([]string{"id", "dep_city_id", "arr_city_id", "dep_time", "arr_time", "airplane_id", "airline", "price", "cxl_sit_id", "remaining_seats", "Airplane__id", "Airplane__name", "DepCity__id", "DepCity__name", "ArrCity__id", "ArrCity__name"}).
+		AddRow(1, 9, 6, suite.timeMock, suite.timeMock, 8, "Southwest Airlines", 1257, 1, 67, 8, "Boeing 787", 9, "Dallas", 6, "Philadelphia")
+
+	reqStr := "^SELECT \\* FROM `flights` WHERE id \\= \\? ORDER BY `flights`\\.`id` LIMIT 1$"
+	suite.sqlMock.ExpectQuery(reqStr).
+		WithArgs(1).
+		WillReturnRows(rows)
+
+	reqBody := "{\"flight_id\":1, \"count\":77}"
+	res, err := suite.CallHandler(reqBody)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func (suite *ReserveTestSuite) TestReserve_MissingFlightId_Failure() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusBadRequest
+	expectedMsg := "\"Bad Request\"\n"
+
+	reqBody := `{"count":10}`
+	res, err := suite.CallHandler(reqBody)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func (suite *ReserveTestSuite) TestReserve_MissingCount_Failure() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusBadRequest
+	expectedMsg := "\"Bad Request\"\n"
+
+	reqBody := `{"flight_id":10}`
+	res, err := suite.CallHandler(reqBody)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func (suite *ReserveTestSuite) TestReserve_Database_Failure() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusInternalServerError
+	expectedMsg := "\"Internal Server Error\"\n"
+
+	reqStr := "^SELECT \\* FROM `flights` WHERE id \\= \\? ORDER BY `flights`\\.`id` LIMIT 1$"
+	suite.sqlMock.ExpectQuery(reqStr).
+		WillReturnError(errors.New("error"))
+
+	reqBody := "{\"flight_id\":1, \"count\":10}"
+	res, err := suite.CallHandler(reqBody)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func TestReserve(t *testing.T) {
+	suite.Run(t, new(ReserveTestSuite))
 }
