@@ -65,7 +65,7 @@ func (suite *GetFlightsTestSuite) TestGetFlights_OneFlight_Success() {
 
 	rows := sqlmock.NewRows([]string{"id", "dep_city_id", "arr_city_id", "dep_time", "arr_time", "airplane_id", "airline", "price", "cxl_sit_id", "remaining_seats", "Airplane__id", "Airplane__name", "DepCity__id", "DepCity__name", "ArrCity__id", "ArrCity__name"}).
 		AddRow(2, 9, 6, suite.timeMock, suite.timeMock, 8, "Southwest Airlines", 1257, 1, 67, 8, "Boeing 787", 9, "Dallas", 6, "Philadelphia")
-	var reqStr string = "^SELECT `flights`\\.`id`,`flights`\\.`dep_city_id`,`flights`\\.`arr_city_id`,`flights`\\.`dep_time`,`flights`\\.`arr_time`,`flights`\\.`airplane_id`,`flights`\\.`airline`,`flights`\\.`price`,`flights`\\.`cxl_sit_id`,`flights`\\.`remaining_seats`,`flights`\\.`created_at`,`flights`\\.`updated_at`,`Airplane`\\.`id` AS `Airplane__id`,`Airplane`\\.`name` AS `Airplane__name`,`Airplane`\\.`created_at` AS `Airplane__created_at`,`Airplane`\\.`updated_at` AS `Airplane__updated_at`,`DepCity`\\.`id` AS `DepCity__id`,`DepCity`\\.`name` AS `DepCity__name`,`DepCity`\\.`created_at` AS `DepCity__created_at`,`DepCity`\\.`updated_at` AS `DepCity__updated_at`,`ArrCity`\\.`id` AS `ArrCity__id`,`ArrCity`\\.`name` AS `ArrCity__name`,`ArrCity`\\.`created_at` AS `ArrCity__created_at`,`ArrCity`\\.`updated_at` AS `ArrCity__updated_at` FROM `flights` LEFT JOIN `airplanes` `Airplane` ON `flights`\\.`airplane_id` \\= `Airplane`\\.`id` LEFT JOIN `cities` `DepCity` ON `flights`\\.`dep_city_id` \\= `DepCity`\\.`id` LEFT JOIN `cities` `ArrCity` ON `flights`\\.`arr_city_id` \\= `ArrCity`\\.`id` WHERE DepCity\\.name \\= \\? AND ArrCity\\.name \\= \\? AND year\\(dep_time\\) \\= \\? AND month\\(dep_time\\) \\= \\? AND day\\(dep_time\\) \\= \\?$"
+	var reqStr string = "^SELECT `flights`\\.`id`,`flights`\\.`dep_city_id`,`flights`\\.`arr_city_id`,`flights`\\.`dep_time`,`flights`\\.`arr_time`,`flights`\\.`airplane_id`,`flights`\\.`airline`,`flights`\\.`price`,`flights`\\.`cxl_sit_id`,`flights`\\.`remaining_seats`,`flights`\\.`flight_class`,`flights`\\.`baggage_allowance`,`flights`\\.`meal_service`,`flights`\\.`gate`,`flights`\\.`created_at`,`flights`\\.`updated_at`,`Airplane`\\.`id` AS `Airplane__id`,`Airplane`\\.`name` AS `Airplane__name`,`Airplane`\\.`created_at` AS `Airplane__created_at`,`Airplane`\\.`updated_at` AS `Airplane__updated_at`,`DepCity`\\.`id` AS `DepCity__id`,`DepCity`\\.`name` AS `DepCity__name`,`DepCity`\\.`created_at` AS `DepCity__created_at`,`DepCity`\\.`updated_at` AS `DepCity__updated_at`,`ArrCity`\\.`id` AS `ArrCity__id`,`ArrCity`\\.`name` AS `ArrCity__name`,`ArrCity`\\.`created_at` AS `ArrCity__created_at`,`ArrCity`\\.`updated_at` AS `ArrCity__updated_at` FROM `flights` LEFT JOIN `airplanes` `Airplane` ON `flights`\\.`airplane_id` \\= `Airplane`\\.`id` LEFT JOIN `cities` `DepCity` ON `flights`\\.`dep_city_id` \\= `DepCity`\\.`id` LEFT JOIN `cities` `ArrCity` ON `flights`\\.`arr_city_id` \\= `ArrCity`\\.`id` WHERE DepCity\\.name \\= \\? AND ArrCity\\.name \\= \\? AND year\\(dep_time\\) \\= \\? AND month\\(dep_time\\) \\= \\? AND day\\(dep_time\\) \\= \\?$"
 	suite.sqlMock.ExpectQuery(reqStr).
 		WithArgs("Dallas", "Philadelphia", 2020, 11, 24).
 		WillReturnRows(rows)
@@ -86,7 +86,7 @@ func (suite *GetFlightsTestSuite) TestGetFlights_MultipleFlights_Success() {
 		AddRow(2, 10, 6, suite.timeMock, suite.timeMock, 8, "Southwest Airlines", 1257, 1, 67, 8, "Boeing 787", 10, "Tehran", 6, "Philadelphia").
 		AddRow(3, 10, 6, suite.timeMock, suite.timeMock, 8, "Iran Air", 1258, 2, 68, 9, "Boeing 747", 10, "Tehran", 6, "Philadelphia")
 
-	var reqStr string = "^SELECT `flights`\\.`id`,`flights`\\.`dep_city_id`,`flights`\\.`arr_city_id`,`flights`\\.`dep_time`,`flights`\\.`arr_time`,`flights`\\.`airplane_id`,`flights`\\.`airline`,`flights`\\.`price`,`flights`\\.`cxl_sit_id`,`flights`\\.`remaining_seats`,`flights`\\.`created_at`,`flights`\\.`updated_at`,`Airplane`\\.`id` AS `Airplane__id`,`Airplane`\\.`name` AS `Airplane__name`,`Airplane`\\.`created_at` AS `Airplane__created_at`,`Airplane`\\.`updated_at` AS `Airplane__updated_at`,`DepCity`\\.`id` AS `DepCity__id`,`DepCity`\\.`name` AS `DepCity__name`,`DepCity`\\.`created_at` AS `DepCity__created_at`,`DepCity`\\.`updated_at` AS `DepCity__updated_at`,`ArrCity`\\.`id` AS `ArrCity__id`,`ArrCity`\\.`name` AS `ArrCity__name`,`ArrCity`\\.`created_at` AS `ArrCity__created_at`,`ArrCity`\\.`updated_at` AS `ArrCity__updated_at` FROM `flights` LEFT JOIN `airplanes` `Airplane` ON `flights`\\.`airplane_id` \\= `Airplane`\\.`id` LEFT JOIN `cities` `DepCity` ON `flights`\\.`dep_city_id` \\= `DepCity`\\.`id` LEFT JOIN `cities` `ArrCity` ON `flights`\\.`arr_city_id` \\= `ArrCity`\\.`id` WHERE DepCity\\.name \\= \\? AND ArrCity\\.name \\= \\? AND year\\(dep_time\\) \\= \\? AND month\\(dep_time\\) \\= \\? AND day\\(dep_time\\) \\= \\?$"
+	var reqStr string = "^SELECT `flights`\\.`id`,`flights`\\.`dep_city_id`,`flights`\\.`arr_city_id`,`flights`\\.`dep_time`,`flights`\\.`arr_time`,`flights`\\.`airplane_id`,`flights`\\.`airline`,`flights`\\.`price`,`flights`\\.`cxl_sit_id`,`flights`\\.`remaining_seats`,`flights`\\.`flight_class`,`flights`\\.`baggage_allowance`,`flights`\\.`meal_service`,`flights`\\.`gate`,`flights`\\.`created_at`,`flights`\\.`updated_at`,`Airplane`\\.`id` AS `Airplane__id`,`Airplane`\\.`name` AS `Airplane__name`,`Airplane`\\.`created_at` AS `Airplane__created_at`,`Airplane`\\.`updated_at` AS `Airplane__updated_at`,`DepCity`\\.`id` AS `DepCity__id`,`DepCity`\\.`name` AS `DepCity__name`,`DepCity`\\.`created_at` AS `DepCity__created_at`,`DepCity`\\.`updated_at` AS `DepCity__updated_at`,`ArrCity`\\.`id` AS `ArrCity__id`,`ArrCity`\\.`name` AS `ArrCity__name`,`ArrCity`\\.`created_at` AS `ArrCity__created_at`,`ArrCity`\\.`updated_at` AS `ArrCity__updated_at` FROM `flights` LEFT JOIN `airplanes` `Airplane` ON `flights`\\.`airplane_id` \\= `Airplane`\\.`id` LEFT JOIN `cities` `DepCity` ON `flights`\\.`dep_city_id` \\= `DepCity`\\.`id` LEFT JOIN `cities` `ArrCity` ON `flights`\\.`arr_city_id` \\= `ArrCity`\\.`id` WHERE DepCity\\.name \\= \\? AND ArrCity\\.name \\= \\? AND year\\(dep_time\\) \\= \\? AND month\\(dep_time\\) \\= \\? AND day\\(dep_time\\) \\= \\?$"
 	suite.sqlMock.ExpectQuery(reqStr).
 		WithArgs("Tehran", "Philadelphia", 2020, 11, 24).
 		RowsWillBeClosed().
@@ -137,7 +137,7 @@ func (suite *GetFlightsTestSuite) TestGetFlights_Database_Failure() {
 	expectedStatusCode := http.StatusInternalServerError
 	expectedMsg := "\"Internal Server Error\"\n"
 
-	var reqStr string = "^SELECT `flights`\\.`id`,`flights`\\.`dep_city_id`,`flights`\\.`arr_city_id`,`flights`\\.`dep_time`,`flights`\\.`arr_time`,`flights`\\.`airplane_id`,`flights`\\.`airline`,`flights`\\.`price`,`flights`\\.`cxl_sit_id`,`flights`\\.`remaining_seats`,`flights`\\.`created_at`,`flights`\\.`updated_at`,`Airplane`\\.`id` AS `Airplane__id`,`Airplane`\\.`name` AS `Airplane__name`,`Airplane`\\.`created_at` AS `Airplane__created_at`,`Airplane`\\.`updated_at` AS `Airplane__updated_at`,`DepCity`\\.`id` AS `DepCity__id`,`DepCity`\\.`name` AS `DepCity__name`,`DepCity`\\.`created_at` AS `DepCity__created_at`,`DepCity`\\.`updated_at` AS `DepCity__updated_at`,`ArrCity`\\.`id` AS `ArrCity__id`,`ArrCity`\\.`name` AS `ArrCity__name`,`ArrCity`\\.`created_at` AS `ArrCity__created_at`,`ArrCity`\\.`updated_at` AS `ArrCity__updated_at` FROM `flights` LEFT JOIN `airplanes` `Airplane` ON `flights`\\.`airplane_id` \\= `Airplane`\\.`id` LEFT JOIN `cities` `DepCity` ON `flights`\\.`dep_city_id` \\= `DepCity`\\.`id` LEFT JOIN `cities` `ArrCity` ON `flights`\\.`arr_city_id` \\= `ArrCity`\\.`id` WHERE DepCity\\.name \\= \\? AND ArrCity\\.name \\= \\? AND year\\(dep_time\\) \\= \\? AND month\\(dep_time\\) \\= \\? AND day\\(dep_time\\) \\= \\?$"
+	var reqStr string = "^SELECT `flights`\\.`id`,`flights`\\.`dep_city_id`,`flights`\\.`arr_city_id`,`flights`\\.`dep_time`,`flights`\\.`arr_time`,`flights`\\.`airplane_id`,`flights`\\.`airline`,`flights`\\.`price`,`flights`\\.`cxl_sit_id`,`flights`\\.`remaining_seats`,`flights`\\.`flight_class`,`flights`\\.`baggage_allowance`,`flights`\\.`meal_service`,`flights`\\.`gate`,`flights`\\.`created_at`,`flights`\\.`updated_at`,`Airplane`\\.`id` AS `Airplane__id`,`Airplane`\\.`name` AS `Airplane__name`,`Airplane`\\.`created_at` AS `Airplane__created_at`,`Airplane`\\.`updated_at` AS `Airplane__updated_at`,`DepCity`\\.`id` AS `DepCity__id`,`DepCity`\\.`name` AS `DepCity__name`,`DepCity`\\.`created_at` AS `DepCity__created_at`,`DepCity`\\.`updated_at` AS `DepCity__updated_at`,`ArrCity`\\.`id` AS `ArrCity__id`,`ArrCity`\\.`name` AS `ArrCity__name`,`ArrCity`\\.`created_at` AS `ArrCity__created_at`,`ArrCity`\\.`updated_at` AS `ArrCity__updated_at` FROM `flights` LEFT JOIN `airplanes` `Airplane` ON `flights`\\.`airplane_id` \\= `Airplane`\\.`id` LEFT JOIN `cities` `DepCity` ON `flights`\\.`dep_city_id` \\= `DepCity`\\.`id` LEFT JOIN `cities` `ArrCity` ON `flights`\\.`arr_city_id` \\= `ArrCity`\\.`id` WHERE DepCity\\.name \\= \\? AND ArrCity\\.name \\= \\? AND year\\(dep_time\\) \\= \\? AND month\\(dep_time\\) \\= \\? AND day\\(dep_time\\) \\= \\?$"
 	suite.sqlMock.ExpectQuery(reqStr).
 		WithArgs("Tokyo", "Philadelphia", 2020, 11, 24).
 		WillReturnError(errors.New("error"))
@@ -245,6 +245,110 @@ func (suite *GetDatesTestSuite) TestGetDates_Database_Failure() {
 
 func TestGetDates(t *testing.T) {
 	suite.Run(t, new(GetDatesTestSuite))
+}
+
+type GetFlightDetailTestSuite struct {
+	suite.Suite
+	sqlMock  sqlmock.Sqlmock
+	e        *echo.Echo
+	flight   Flight
+	timeMock time.Time
+}
+
+func (suite *GetFlightDetailTestSuite) SetupSuite() {
+	mockDB, sqlMock, err := sqlmock.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db, err := gorm.Open(mysql.New(mysql.Config{
+		Conn:                      mockDB,
+		SkipInitializeWithVersion: true,
+	}))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	suite.sqlMock = sqlMock
+	suite.e = echo.New()
+	suite.flight = Flight{
+		DB:        db,
+		Validator: validator.New(),
+	}
+	suite.timeMock = time.Date(2020, time.January, 1, 2, 3, 0, 0, time.UTC)
+}
+
+func (suite *GetFlightDetailTestSuite) CallHandler(body string) (*httptest.ResponseRecorder, error) {
+	req := httptest.NewRequest(http.MethodGet, "/flights/detail", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	ctx := suite.e.NewContext(req, res)
+	err := suite.flight.GetFlightDetail(ctx)
+
+	return res, err
+}
+
+func (suite *GetFlightDetailTestSuite) TestGetFlightDetail_Success() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusOK
+	expectedMsg := `{"id":1,"dep_city":{"id":2,"name":"Paris"},"arr_city":{"id":6,"name":"Oslo"},"dep_time":"` + suite.timeMock.Format(time.RFC3339) + `","arr_time":"` + suite.timeMock.Format(time.RFC3339) + `","airplane":{"id":5,"name":"SukhoiSSJ100"},"airline":"Lufthansa","price":1064,"cxl_sit_id":1,"remaining_seats":73,"flight_class":"Economy Class","baggage_allowance":"2 bags, 23kg each","meal_service":"Gourmet meals","gate":"C3"}`
+	rows := sqlmock.NewRows([]string{"id", "dep_city_id", "arr_city_id", "dep_time", "arr_time", "airplane_id", "airline", "price", "cxl_sit_id", "remaining_seats", "flight_class", "baggage_allowance", "meal_service", "gate", "Airplane__id", "Airplane__name", "DepCity__id", "DepCity__name", "ArrCity__id", "ArrCity__name"}).
+		AddRow(1, 2, 6, suite.timeMock, suite.timeMock, 5, "Lufthansa", 1064, 1, 73, "Economy Class", "2 bags, 23kg each", "Gourmet meals", "C3", 5, "SukhoiSSJ100", 2, "Paris", 6, "Oslo")
+	var reqStr = "^SELECT `flights`\\.`id`,`flights`\\.`dep_city_id`,`flights`\\.`arr_city_id`,`flights`\\.`dep_time`,`flights`\\.`arr_time`,`flights`\\.`airplane_id`,`flights`\\.`airline`,`flights`\\.`price`,`flights`\\.`cxl_sit_id`,`flights`\\.`remaining_seats`,`flights`\\.`flight_class`,`flights`\\.`baggage_allowance`,`flights`\\.`meal_service`,`flights`\\.`gate`,`flights`\\.`created_at`,`flights`\\.`updated_at`,`Airplane`\\.`id` AS `Airplane__id`,`Airplane`\\.`name` AS `Airplane__name`,`Airplane`\\.`created_at` AS `Airplane__created_at`,`Airplane`\\.`updated_at` AS `Airplane__updated_at`,`DepCity`\\.`id` AS `DepCity__id`,`DepCity`\\.`name` AS `DepCity__name`,`DepCity`\\.`created_at` AS `DepCity__created_at`,`DepCity`\\.`updated_at` AS `DepCity__updated_at`,`ArrCity`\\.`id` AS `ArrCity__id`,`ArrCity`\\.`name` AS `ArrCity__name`,`ArrCity`\\.`created_at` AS `ArrCity__created_at`,`ArrCity`\\.`updated_at` AS `ArrCity__updated_at` FROM `flights` LEFT JOIN `airplanes` `Airplane` ON `flights`\\.`airplane_id` \\= `Airplane`\\.`id` LEFT JOIN `cities` `DepCity` ON `flights`\\.`dep_city_id` \\= `DepCity`\\.`id` LEFT JOIN `cities` `ArrCity` ON `flights`\\.`arr_city_id` \\= `ArrCity`\\.`id` WHERE flights\\.id \\= \\? ORDER BY `flights`\\.`id` LIMIT 1$"
+	suite.sqlMock.ExpectQuery(reqStr).
+		WithArgs(1).
+		WillReturnRows(rows)
+
+	res, err := suite.CallHandler(`{"flight_id": 1}`)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+
+}
+
+func (suite *GetFlightDetailTestSuite) TestGetFlightDetail_MissingFlightId_Failure() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusBadRequest
+	expectedMsg := "\"Bad Request\"\n"
+
+	res, err := suite.CallHandler(``)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func (suite *GetFlightDetailTestSuite) TestGetFlightDetail_FlightNotFound_Failure() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusBadRequest
+	expectedMsg := "\"Bad Request\"\n"
+
+	var reqStr = "^SELECT `flights`\\.`id`,`flights`\\.`dep_city_id`,`flights`\\.`arr_city_id`,`flights`\\.`dep_time`,`flights`\\.`arr_time`,`flights`\\.`airplane_id`,`flights`\\.`airline`,`flights`\\.`price`,`flights`\\.`cxl_sit_id`,`flights`\\.`remaining_seats`,`flights`\\.`flight_class`,`flights`\\.`baggage_allowance`,`flights`\\.`meal_service`,`flights`\\.`gate`,`flights`\\.`created_at`,`flights`\\.`updated_at`,`Airplane`\\.`id` AS `Airplane__id`,`Airplane`\\.`name` AS `Airplane__name`,`Airplane`\\.`created_at` AS `Airplane__created_at`,`Airplane`\\.`updated_at` AS `Airplane__updated_at`,`DepCity`\\.`id` AS `DepCity__id`,`DepCity`\\.`name` AS `DepCity__name`,`DepCity`\\.`created_at` AS `DepCity__created_at`,`DepCity`\\.`updated_at` AS `DepCity__updated_at`,`ArrCity`\\.`id` AS `ArrCity__id`,`ArrCity`\\.`name` AS `ArrCity__name`,`ArrCity`\\.`created_at` AS `ArrCity__created_at`,`ArrCity`\\.`updated_at` AS `ArrCity__updated_at` FROM `flights` LEFT JOIN `airplanes` `Airplane` ON `flights`\\.`airplane_id` \\= `Airplane`\\.`id` LEFT JOIN `cities` `DepCity` ON `flights`\\.`dep_city_id` \\= `DepCity`\\.`id` LEFT JOIN `cities` `ArrCity` ON `flights`\\.`arr_city_id` \\= `ArrCity`\\.`id` WHERE flights\\.id \\= \\? ORDER BY `flights`\\.`id` LIMIT 1$"
+	suite.sqlMock.ExpectQuery(reqStr).
+		WithArgs(1).WillReturnError(gorm.ErrRecordNotFound)
+
+	res, err := suite.CallHandler(`{"flight_id": 1}`)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func (suite *GetFlightDetailTestSuite) TestGetFlightDetail_Database_Failure() {
+	require := suite.Require()
+	expectedStatusCode := http.StatusInternalServerError
+	expectedMsg := "\"Internal Server Error\"\n"
+
+	var reqStr = "^SELECT `flights`\\.`id`,`flights`\\.`dep_city_id`,`flights`\\.`arr_city_id`,`flights`\\.`dep_time`,`flights`\\.`arr_time`,`flights`\\.`airplane_id`,`flights`\\.`airline`,`flights`\\.`price`,`flights`\\.`cxl_sit_id`,`flights`\\.`remaining_seats`,`flights`\\.`flight_class`,`flights`\\.`baggage_allowance`,`flights`\\.`meal_service`,`flights`\\.`gate`,`flights`\\.`created_at`,`flights`\\.`updated_at`,`Airplane`\\.`id` AS `Airplane__id`,`Airplane`\\.`name` AS `Airplane__name`,`Airplane`\\.`created_at` AS `Airplane__created_at`,`Airplane`\\.`updated_at` AS `Airplane__updated_at`,`DepCity`\\.`id` AS `DepCity__id`,`DepCity`\\.`name` AS `DepCity__name`,`DepCity`\\.`created_at` AS `DepCity__created_at`,`DepCity`\\.`updated_at` AS `DepCity__updated_at`,`ArrCity`\\.`id` AS `ArrCity__id`,`ArrCity`\\.`name` AS `ArrCity__name`,`ArrCity`\\.`created_at` AS `ArrCity__created_at`,`ArrCity`\\.`updated_at` AS `ArrCity__updated_at` FROM `flights` LEFT JOIN `airplanes` `Airplane` ON `flights`\\.`airplane_id` \\= `Airplane`\\.`id` LEFT JOIN `cities` `DepCity` ON `flights`\\.`dep_city_id` \\= `DepCity`\\.`id` LEFT JOIN `cities` `ArrCity` ON `flights`\\.`arr_city_id` \\= `ArrCity`\\.`id` WHERE flights\\.id \\= \\? ORDER BY `flights`\\.`id` LIMIT 1$"
+	suite.sqlMock.ExpectQuery(reqStr).
+		WillReturnError(errors.New("error"))
+
+	res, err := suite.CallHandler(`{"flight_id": 1}`)
+	require.NoError(err)
+	require.Equal(expectedStatusCode, res.Code)
+	require.JSONEq(expectedMsg, res.Body.String())
+}
+
+func TestGetFlightDetail(t *testing.T) {
+	suite.Run(t, new(GetFlightDetailTestSuite))
 }
 
 type ReserveTestSuite struct {
