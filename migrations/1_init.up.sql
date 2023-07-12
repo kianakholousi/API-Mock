@@ -32,6 +32,10 @@ CREATE TABLE IF NOT EXISTS flights (
     price int NOT NULL ,
     cxl_sit_id int NOT NULL ,
     remaining_seats int NOT NULL,
+    flight_class varchar(255) NOT NULL ,
+    baggage_allowance varchar(255) NOT NULL ,
+    meal_service varchar(255) NOT NULL,
+    gate varchar(255) NOT NULL ,
     created_at datetime DEFAULT NOW(),
     updated_at datetime DEFAULT NOW() ON UPDATE NOW(),
 
